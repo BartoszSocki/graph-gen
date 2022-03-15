@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+
+
 static void ensure_extra_capacity(PriorityQueue * pr)
 {
     if(pr->size == pr->capacity)
@@ -100,4 +102,28 @@ void priority_queue_free(PriorityQueue * pr)
 {
     free(pr->items);
     free(pr);
+}
+
+void priority_queue_update(PriorityQueue * pr, int item_val, int new_val)
+{
+    //find element to be updated
+    int index_of_updated_element = -1;
+    for(int i = 0; i< pr->size; i++)
+    {
+        if(pr->items[i] == item_val)
+            index_of_updated_element = i;
+    }
+
+    //update element value and restore order
+    if(new_val > item_val)
+    {
+        pr->items[index_of_updated_element] = new_val;
+        heapify_down(pr, index_of_updated_element);   
+    }
+    else
+    {
+        pr->items[index_of_updated_element] = new_val;
+        heapify_up(pr, index_of_updated_element);   
+    }
+
 }

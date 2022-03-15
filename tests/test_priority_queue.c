@@ -8,11 +8,11 @@ int main(int argc, char * argv[])
 {
     PriorityQueue * pr = priority_queue_initalize(10);
 
-    for(int i =1000; i != 0; i--)
+    for(int i =10; i != 0; i--)
     {
         priority_queue_add(pr, i);
     }
-
+    priority_queue_update(pr, 5, 69);
 
     while(pr->size != 0)
     {
