@@ -12,7 +12,10 @@ int main(int argc, char * argv[])
     {
         priority_queue_add(pr, i);
     }
-    priority_queue_update(pr, 5, 69);
+    
+    priority_queue_update(pr, 2, 1);
+    
+    priority_queue_update(pr, 5, 42);
 
     while(pr->size != 0)
     {
