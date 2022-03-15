@@ -6,5 +6,20 @@
 
 int main(int argc, char * argv[])
 {
-    hehe();
+    PriorityQueue * pr = priority_queue_initalize(10);
+
+    for(int i =1000; i != 0; i--)
+    {
+        priority_queue_add(pr, i);
+    }
+
+
+    while(pr->size != 0)
+    {
+        printf("%d\n", priority_queue_poll(pr));
+    }
+   
+    priority_queue_free(pr);
+
+    return 0;
 }

@@ -1,11 +1,18 @@
-#ifndef _PRIORITY_QUEUE_H_
-#define _PRIORITY_QUEUE_H_
+#ifndef _PRIORITY_QEUEUE
+#define _PRIORITY_QEUEUE
 
-void hehe();
-typedef struct priority_queue
-{
-    int xd;
-} pq;
+typedef struct{
 
+    int capacity; 
+    int size;
+
+    int * items;
+} PriorityQueue;
+
+PriorityQueue * priority_queue_initalize(int init_capacity);
+
+void priority_queue_free(PriorityQueue * pr);
+int priority_queue_add(PriorityQueue * pr, int item);
+int priority_queue_poll(PriorityQueue * pr);
 
 #endif
