@@ -18,7 +18,7 @@ typedef struct _Graph {
 	double to;
 } Graph;
 
-VertexNode* vertexNodeInit(unsigned int adj, double weight, VertexNode* next);
+VertexNode* vertexNodeInit(unsigned int adj_node, double weight, VertexNode* next);
 Graph* graphGenerateFromSeed(size_t rows, size_t cols, double from, double to, long seed);
 Graph* graphReadFromStdin();
 void graphPrintToStdout(Graph* graph);

@@ -4,24 +4,37 @@
 #include "graph.h"
 
 static double _uniformRandom(double from, double to) {
-    double rand_val = (double)rand() / RAND_MAX;
-    return from + rand_val * (to - from);
+	return from + ((double) rand() * (to - from)) / RAND_MAX;
 }
 
-static int _xyToIndex(Graph* graph, int x, int y) {
-    return y * graph->rows + x;
+static int _xyToIndex(Graph* graph, int row, int col) {
+	return row * graph->cols + col;
 }
 
-static VertexNode* _vertexNodeAppend(VertexNode* list, VertexNode* elem) {
-    VertexNode* dummy = list;
-    if (!list)
-        return elem;
+static void _vertexNodeAppend(VertexNode** list, VertexNode* elem) {
+    VertexNode* dummy = *list;
+    if (!dummy) {
+		*list = elem;
+		return;
+	}
 
     while (dummy && dummy->next)
         dummy = dummy->next;
 
     dummy->next = elem;
-    return list;
+}
+
+static void _graphAddEdgeBetweenTwoVertexes(Graph* graph, size_t index_a, size_t index_b, double weight) {
+	if (!graph || !graph->adj)
+		return;
+	if (index_a >= graph->rows * graph->cols || index_b >= graph->rows * graph->cols)
+		return;
+
+	VertexNode **a = &(graph->adj[index_a]);
+	VertexNode **b = &(graph->adj[index_b]);
+
+	_vertexNodeAppend(a, vertexNodeInit(index_b, weight, NULL));
+	_vertexNodeAppend(b, vertexNodeInit(index_a, weight, NULL));
 }
 
 // this is stupid but I cannot find an easy way of generating undirected edges :/
@@ -29,36 +42,28 @@ static void _graphGenerateAdjListCardinal(Graph* graph) {
     if (!graph)
         return;
 
-    VertexNode* left, right, top, bottom;
+    VertexNode **left, **right, **top, **bottom;
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
             double rand_val = _uniformRandom(graph->from, graph->to);
-            left = graph->adj[_xyToIndex(graph, i, j)];
-            right = graph->adj[_xyToIndex(graph, i + 1, j)];
-
-            _vertexNodeAppend(left, vertexNodeInit(_xyToIndex(graph, i + 1, j), rand_val, NULL));
-            _vertexNodeAppend(right, vertexNodeInit(_xyToIndex(graph, i, j), rand_val, NULL));
+			_graphAddEdgeBetweenTwoVertexes(graph, _xyToIndex(graph, i, j), _xyToIndex(graph, i + 1, j), rand_val);
         }
     }
 
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols - 1; j++) {
             double rand_val = _uniformRandom(graph->from, graph->to);
-            top = graph->adj[_xyToIndex(graph, i, j)];
-            bottom = graph->adj[_xyToIndex(graph, i, j + 1)];
-
-            _vertexNodeAppend(top, vertexNodeInit(_xyToIndex(graph, i, j), rand_val, NULL));
-            _vertexNodeAppend(bottom, vertexNodeInit(_xyToIndex(graph, i, j + 1), rand_val, NULL));
+			_graphAddEdgeBetweenTwoVertexes(graph, _xyToIndex(graph, i, j), _xyToIndex(graph, i, j + 1), rand_val);
         }
     }
 }
 
-VertexNode* vertexNodeInit(unsigned int adj, double weight, VertexNode* next) {
+VertexNode* vertexNodeInit(unsigned int adj_node, double weight, VertexNode* next) {
     VertexNode* node = malloc(sizeof(*node));
     if (!node)
         return NULL;
 
-    node->adj = adj;
+	node->adj_node = adj_node;
 	node->weight = weight;
 	node->next = next;
 
@@ -66,6 +71,8 @@ VertexNode* vertexNodeInit(unsigned int adj, double weight, VertexNode* next) {
 }
 
 Graph* graphGenerateFromSeed(size_t rows, size_t cols, double from, double to, long seed) {
+	Graph* graph = malloc(sizeof(*graph));
+
     if (!graph)
         return NULL;
 
@@ -75,6 +82,8 @@ Graph* graphGenerateFromSeed(size_t rows, size_t cols, double from, double to, l
 
     graph->rows = rows;
     graph->cols = cols;
+    graph->from = from;
+	graph->to = to;
 
     srand(seed);
     _graphGenerateAdjListCardinal(graph);
@@ -83,21 +92,23 @@ Graph* graphGenerateFromSeed(size_t rows, size_t cols, double from, double to, l
 }
 
 Graph* graphReadFromStdin() {
-    /* ... */
+	return NULL;
 }
 
 void graphPrintToStdout(Graph* graph) {
     if (!graph) {
-        puts("(null)");
+        puts("0 0");
         return;
     }
 
-    printf("%d %d\n", graph->rows, graph->cols);
+    printf("%zu %zu\n", graph->rows, graph->cols);
     for (int i = 0; i < graph->rows; i++) {
-        for (int j = 0; i < graph->cols; j++) {
+        for (int j = 0; j < graph->cols; j++) {
             VertexNode* dummy = graph->adj[_xyToIndex(graph, i, j)];
+			/* printf("%p", dummy); */
+			printf("\t");
             while (dummy) {
-                printf("%d :%lf  ", dummy->adj_node, dummy->weight);
+                printf("%u :%lf  ", dummy->adj_node, dummy->weight);
                 dummy = dummy->next;
             }
             printf("\n");
