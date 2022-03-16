@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 
+#define BUF_READ_SIZE 512
+
 typedef struct _VertexNode {
 	struct _VertexNode* next;
 	unsigned int adj_node;
