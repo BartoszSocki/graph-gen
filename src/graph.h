@@ -16,8 +16,12 @@ typedef struct _Graph {
 } Graph;
 
 EdgeNode* edge_node_init(int connected_vertex, double weight, EdgeNode* next);
-Graph* graph_generate_from_seed(size_t rows, size_t cols, double from, double to, long seed);
+void edge_node_free(EdgeNode* edge);
+
+Graph* graph_generate_from_seed(int rows, int cols, double from, double to, long seed);
 Graph* graph_read_from_stdin();
 void graph_print_to_stdout(Graph* graph);
+int graph_xy_to_index(Graph* graph, int row, int col);
+void graph_free(Graph* graph);
 
 #endif

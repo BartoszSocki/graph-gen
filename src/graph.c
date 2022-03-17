@@ -1,15 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <time.h>
 #include <string.h>
 #include "graph.h"
 
 static double _uniform_random(double min, double max) {
 	return min + ((double) rand() * (max - min)) / RAND_MAX;
-}
-
-static int _xy_to_index(Graph* graph, int row, int col) {
-	return row * graph->cols + col;
 }
 
 static void _edge_node_append(EdgeNode **list, EdgeNode *elem) {
@@ -37,7 +32,7 @@ static void _graph_add_directed_edge(Graph *graph, size_t beg_vertex, size_t end
 	_edge_node_append(a, edge_node_init(end_vertex, weight, NULL));
 }
 
-// cardinal = in cardinal directions
+// in cardinal directions N, E, S, W
 static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double min, double max) {
     if (!graph)
         return;
@@ -45,18 +40,22 @@ static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double mi
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
             double weight = _uniform_random(min, max);
-			_graph_add_directed_edge(graph, _xy_to_index(graph, i, j), _xy_to_index(graph, i + 1, j), weight);
-			_graph_add_directed_edge(graph, _xy_to_index(graph, i + 1, j), _xy_to_index(graph, i, j), weight);
+			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
+			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
         }
     }
 
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols - 1; j++) {
             double weight = _uniform_random(min, max);
-			_graph_add_directed_edge(graph, _xy_to_index(graph, i, j), _xy_to_index(graph, i, j + 1), weight);
-			_graph_add_directed_edge(graph, _xy_to_index(graph, i, j + 1), _xy_to_index(graph, i, j), weight);
+			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
+			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
         }
     }
+}
+
+int graph_xy_to_index(Graph* graph, int row, int col) {
+	return row * graph->cols + col;
 }
 
 EdgeNode* edge_node_init(int end_vertex, double weight, EdgeNode *next) {
@@ -71,7 +70,7 @@ EdgeNode* edge_node_init(int end_vertex, double weight, EdgeNode *next) {
 	return edge;
 }
 
-Graph* graph_generate_from_seed(size_t rows, size_t cols, double min, double max, long seed) {
+Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long seed) {
 	Graph* graph = malloc(sizeof(*graph));
 
     if (!graph)
@@ -80,6 +79,9 @@ Graph* graph_generate_from_seed(size_t rows, size_t cols, double min, double max
     graph->edges = calloc(rows * cols, sizeof(*graph->edges));
     if (!graph->edges)
         return NULL;
+
+	if (rows <= 0 || cols <= 0)
+		return NULL;
 
     graph->rows = rows;
     graph->cols = cols;
@@ -99,9 +101,13 @@ Graph* graph_read_from_stdin() {
 	if (getline(&buff, &_buff_size, in) <= 0)
 		exit(EXIT_FAILURE);
 
-	// read size of graph
-	sscanf(buff, "%zd %zd", &graph->rows, &graph->cols);
+	int rows, cols;
+	sscanf(buff, "%d %d", &rows, &cols);
+	if (rows <= 0 || cols <= 0)
+		return NULL;
 
+	graph->rows = rows;
+	graph->cols = cols;
     graph->edges = calloc(graph->rows * graph->cols, sizeof(*graph->edges));
     if (!graph->edges)
         return NULL;
@@ -139,7 +145,7 @@ void graph_print_to_stdout(Graph *graph) {
     printf("%zu %zu\n", graph->rows, graph->cols);
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols; j++) {
-            EdgeNode* dummy = graph->edges[_xy_to_index(graph, i, j)];
+            EdgeNode* dummy = graph->edges[graph_xy_to_index(graph, i, j)];
 			printf("\t");
             while (dummy) {
                 printf("%u :%lf  ", dummy->end_vertex, dummy->weight);
@@ -148,4 +154,32 @@ void graph_print_to_stdout(Graph *graph) {
             printf("\n");
         }
     }
+}
+
+void edge_node_free(EdgeNode* edge) {
+	EdgeNode *prev;
+	while (edge) {
+		prev = edge;
+		prev->next = NULL;
+		edge = edge->next;
+		free(prev);
+	}
+	free(edge);
+}
+
+void graph_free(Graph* graph) {
+	if (!graph)
+		return;
+
+	if (!graph->edges) {
+		free(graph);
+		return;
+	}
+
+	for (int i = 0; i < graph->rows * graph->cols; i++)
+		edge_node_free(graph->edges[i]);
+
+	free(graph->edges);
+	free(graph);
+	graph = NULL;
 }
