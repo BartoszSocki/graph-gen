@@ -9,8 +9,23 @@ static void ensure_extra_capacity(VertexPriorityQueue * pr)
 {
     if(pr->size == pr->capacity)
     {
-        pr->verticies = realloc(pr->verticies, pr->capacity * 2 * sizeof(*pr->verticies));
-        pr->vertex_indexes = realloc(pr->vertex_indexes, pr->capacity * 2 * sizeof(*pr->vertex_indexes));
+        QueuedVertex ** new_verticies_pointer = NULL;
+        int * new_vertex_index_pointer = NULL;
+
+
+        new_verticies_pointer =  realloc(pr->verticies, pr->capacity * 2 * sizeof(*pr->verticies));
+        new_vertex_index_pointer = realloc(pr->vertex_indexes, pr->capacity * 2 * sizeof(*pr->vertex_indexes));
+
+        if((new_verticies_pointer == NULL) || (new_vertex_index_pointer == NULL))
+        {
+            fprintf(stderr, "ERROR: can't reallocate vertex array\n");
+        }
+        else
+        {
+            pr->verticies = new_verticies_pointer;
+            pr->vertex_indexes = new_vertex_index_pointer;
+        }
+
         pr->capacity *=2;
     }
 }

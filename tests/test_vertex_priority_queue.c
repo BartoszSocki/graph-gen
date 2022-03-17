@@ -1,44 +1,46 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "float.h"
+#include <float.h>
 #include "vertex_priority_queue.h"
 
 
-QueuedVertex * test_vertex(int index, double dist)
-{
-    QueuedVertex * q = malloc(sizeof(QueuedVertex));
-    q->index = index;
-    q->dist = dist;
-
-    return q;
-}
 
 
 int main(int argc, char * argv[])
 {
-    VertexPriorityQueue * pr = vertex_priority_queue_initalize(100);
+    VertexPriorityQueue * pr = vertex_priority_queue_initalize(10);
 
-    for(int i = 99; i != -1; i--)
+    //create verticies
+    int no_vertex=100;
+    QueuedVertex ** q;
+    q = malloc(no_vertex * sizeof(*q));
+    for(int i =0; i< no_vertex; i++)
     {
-        vertex_priority_queue_add(pr, test_vertex(i, DBL_MAX));
+        q[i] = malloc(sizeof(*q[i]));
+        q[i]->dist = DBL_MAX;
+        q[i]->index = i;
     }
 
-    for(int i = 99; i != -1; i--)
-    {
-        vertex_priority_queue_update(pr, i, 99-i);
-    }
-
-
-  
+    //add verticies to the queue
+    for(int i =0; i< no_vertex; i++)
+        vertex_priority_queue_add(pr, q[i]);
+    //update their distance
+    for(int i =0; i< no_vertex; i++)
+        vertex_priority_queue_update(pr, i, no_vertex-i-1);
+    //poll until the queue is empty
     while(pr->size != 0)
     {
-        QueuedVertex * p = vertex_priority_queue_poll(pr);
-        printf("Vertex(index=%d, dist=%g)\n", p->index, p->dist);
-
-        free(p);
+        QueuedVertex * a = vertex_priority_queue_poll(pr);
+        printf("Vertex(index=%d, dist=%g)\n", a->index, a->dist);
     }
 
-
+    //clean up
+    for(int i =0; i < no_vertex;i++)
+    {
+        free(q[i]);
+    }
     vertex_priority_queue_free(pr);
+
+
     return 0;
 }
