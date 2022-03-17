@@ -3,26 +3,21 @@
 
 #include <stdlib.h>
 
-#define BUF_READ_SIZE 512
-
-typedef struct _VertexNode {
-	struct _VertexNode* next;
-	unsigned int adj_node;
+typedef struct _EdgeNode {
+	struct _EdgeNode* next;
+	int end_vertex;
 	double weight;
-} VertexNode;
+} EdgeNode;
 
 typedef struct _Graph {
-	VertexNode** adj;
+	EdgeNode** edges;
 	size_t rows;
 	size_t cols;
-
-	double from;
-	double to;
 } Graph;
 
-VertexNode* vertexNodeInit(unsigned int adj_node, double weight, VertexNode* next);
-Graph* graphGenerateFromSeed(size_t rows, size_t cols, double from, double to, long seed);
-Graph* graphReadFromStdin();
-void graphPrintToStdout(Graph* graph);
+EdgeNode* edge_node_init(int connected_vertex, double weight, EdgeNode* next);
+Graph* graph_generate_from_seed(size_t rows, size_t cols, double from, double to, long seed);
+Graph* graph_read_from_stdin();
+void graph_print_to_stdout(Graph* graph);
 
 #endif
