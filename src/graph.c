@@ -8,7 +8,7 @@ static double _uniform_random(double min, double max) {
 	return min + ((double) rand() * (max - min)) / RAND_MAX;
 }
 
-static int _xyToIndex(Graph* graph, int row, int col) {
+static int _xy_to_index(Graph* graph, int row, int col) {
 	return row * graph->cols + col;
 }
 
@@ -45,16 +45,16 @@ static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double mi
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
             double weight = _uniform_random(min, max);
-			_graph_add_directed_edge(graph, _xyToIndex(graph, i, j), _xyToIndex(graph, i + 1, j), weight);
-			_graph_add_directed_edge(graph, _xyToIndex(graph, i + 1, j), _xyToIndex(graph, i, j), weight);
+			_graph_add_directed_edge(graph, _xy_to_index(graph, i, j), _xy_to_index(graph, i + 1, j), weight);
+			_graph_add_directed_edge(graph, _xy_to_index(graph, i + 1, j), _xy_to_index(graph, i, j), weight);
         }
     }
 
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols - 1; j++) {
             double weight = _uniform_random(min, max);
-			_graph_add_directed_edge(graph, _xyToIndex(graph, i, j), _xyToIndex(graph, i, j + 1), weight);
-			_graph_add_directed_edge(graph, _xyToIndex(graph, i, j + 1), _xyToIndex(graph, i, j), weight);
+			_graph_add_directed_edge(graph, _xy_to_index(graph, i, j), _xy_to_index(graph, i, j + 1), weight);
+			_graph_add_directed_edge(graph, _xy_to_index(graph, i, j + 1), _xy_to_index(graph, i, j), weight);
         }
     }
 }
@@ -139,7 +139,7 @@ void graph_print_to_stdout(Graph *graph) {
     printf("%zu %zu\n", graph->rows, graph->cols);
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols; j++) {
-            EdgeNode* dummy = graph->edges[_xyToIndex(graph, i, j)];
+            EdgeNode* dummy = graph->edges[_xy_to_index(graph, i, j)];
 			printf("\t");
             while (dummy) {
                 printf("%u :%lf  ", dummy->end_vertex, dummy->weight);
