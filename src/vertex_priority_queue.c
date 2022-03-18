@@ -1,7 +1,7 @@
 #include "vertex_priority_queue.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <float.h>
+#include <stdio.h> // stderr
+#include <stdlib.h> // malloc, realloc
+#include <float.h> //DBL_MAX
 
 
 
@@ -14,16 +14,16 @@ static void ensure_extra_capacity(VertexPriorityQueue * pr)
 
 
         new_verticies_pointer =  realloc(pr->verticies, pr->capacity * 2 * sizeof(*pr->verticies));
-        new_vertex_index_pointer = realloc(pr->vertex_indexes, pr->capacity * 2 * sizeof(*pr->vertex_indexes));
+        new_vertex_index_pointer = realloc(pr->verticies_indexes, pr->capacity * 2 * sizeof(*pr->verticies_indexes));
 
         if((new_verticies_pointer == NULL) || (new_vertex_index_pointer == NULL))
         {
-            fprintf(stderr, "ERROR: can't reallocate vertex array\n");
+            fprintf(stderr, "ERROR: can't reallocate elements.\n");
         }
         else
         {
             pr->verticies = new_verticies_pointer;
-            pr->vertex_indexes = new_vertex_index_pointer;
+            pr->verticies_indexes = new_vertex_index_pointer;
         }
 
         pr->capacity *=2;
@@ -39,9 +39,11 @@ static void swap_queued_vertex(VertexPriorityQueue * pr, int a_index, int b_inde
 {
     QueuedVertex ** array = pr->verticies; 
 
-    pr->vertex_indexes[pr->verticies[b_index]->index] = a_index;
-    pr->vertex_indexes[pr->verticies[a_index]->index] = b_index;
+    //update stored indexes
+    pr->verticies_indexes[pr->verticies[b_index]->index] = a_index;
+    pr->verticies_indexes[pr->verticies[a_index]->index] = b_index;
 
+    //swap elements in the array 
     QueuedVertex * tmp = array[a_index];
     array[a_index] = array[b_index];
     array[b_index] = tmp;  
@@ -54,6 +56,7 @@ static void heapify_up(VertexPriorityQueue * pr, int in)
     int index = in;
     int parent_index = get_parent_index(index);
 
+    //move up the tree and swap elements until the order is restored
     while((parent_index >= 0) && (pr->verticies[parent_index]->dist > pr->verticies[index]->dist))
     {
         swap_queued_vertex(pr, index, parent_index);
@@ -69,6 +72,7 @@ static void heapify_down(VertexPriorityQueue * pr, int in)
     int left_child_index = get_left_child_index(index);
     int right_child_index = get_right_child_index(index);
 
+    //move down the tree and swap elements until the order is restored
     while(left_child_index < pr->size)
     {
         int smaller_child_index = left_child_index;
@@ -93,12 +97,13 @@ QueuedVertex * vertex_priority_queue_poll(VertexPriorityQueue * pr)
         return NULL;
 
     QueuedVertex * item = pr->verticies[0];
+    pr->verticies_indexes[item->index] = -1;
 
-    pr->vertex_indexes[item->index] = -1;
-
+    //swap the root element with the element on the end of the queue
     pr->verticies[0] = pr->verticies[pr->size -1];
     pr->size--;        
 
+    //restore the order
     heapify_down(pr, 0);
 
     return item;
@@ -108,13 +113,12 @@ void vertex_priority_queue_add(VertexPriorityQueue * pr, QueuedVertex * item)
 {
     ensure_extra_capacity(pr);
 
+    //add element to the end
     pr->verticies[pr->size] = item;
-    pr->vertex_indexes[item->index] = pr->size;
-
-
+    pr->verticies_indexes[item->index] = pr->size;
     pr->size++;
 
-
+    //restore the order of the heap
     heapify_up(pr, pr->size-1);
 }
 
@@ -128,7 +132,7 @@ VertexPriorityQueue * vertex_priority_queue_initalize(int init_capacity)
     new_pr->capacity = init_capacity;
 
     new_pr->verticies = malloc(new_pr->capacity * sizeof(*new_pr->verticies));
-    new_pr->vertex_indexes = malloc(new_pr->capacity * sizeof(*new_pr->vertex_indexes));
+    new_pr->verticies_indexes = malloc(new_pr->capacity * sizeof(*new_pr->verticies_indexes));
 
     return new_pr;
 }
@@ -136,28 +140,29 @@ VertexPriorityQueue * vertex_priority_queue_initalize(int init_capacity)
 
 void vertex_priority_queue_free(VertexPriorityQueue * pr)
 {
-
     pr->size = 0;
     pr->capacity = 0;
 
-    free(pr->vertex_indexes);
+    free(pr->verticies_indexes);
     free(pr->verticies);
     free(pr);
+
 }
 
 
 void vertex_priority_queue_update(VertexPriorityQueue * pr, int index, double new_dist)
 {
-    int index_of_updated_element = pr->vertex_indexes[index];
+    int index_of_element_to_be_updated = pr->verticies_indexes[index];
 
-    if(new_dist > pr->verticies[index_of_updated_element]->dist)
+    //check whether the dist value has increased or decreased and restore the order of heap
+    if(new_dist > pr->verticies[index_of_element_to_be_updated]->dist)
     {
-        pr->verticies[index_of_updated_element]->dist = new_dist;
-        heapify_down(pr, index_of_updated_element);
+        pr->verticies[index_of_element_to_be_updated]->dist = new_dist;
+        heapify_down(pr, index_of_element_to_be_updated);
     }
-    else if(new_dist < pr->verticies[index_of_updated_element]->dist)
+    else if(new_dist < pr->verticies[index_of_element_to_be_updated]->dist)
     {
-        pr->verticies[index_of_updated_element]->dist = new_dist;
-        heapify_up(pr, index_of_updated_element);
+        pr->verticies[index_of_element_to_be_updated]->dist = new_dist;
+        heapify_up(pr, index_of_element_to_be_updated);
     }
 }
