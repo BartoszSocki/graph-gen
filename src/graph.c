@@ -37,6 +37,9 @@ static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double mi
     if (!graph)
         return;
 
+	if (min > max)
+		return;
+
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
             double weight = _uniform_random(min, max);
@@ -80,8 +83,15 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
     if (!graph->edges)
         return NULL;
 
-	if (rows <= 0 || cols <= 0)
+	if (rows <= 0 || cols <= 0) {
+		graph_free(graph);
 		return NULL;
+	}
+
+	if (min > max) {
+		graph_free(graph);
+		return NULL;
+	}
 
     graph->rows = rows;
     graph->cols = cols;
