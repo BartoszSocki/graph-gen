@@ -11,7 +11,7 @@ int main(int argc, char * argv[])
     VertexPriorityQueue * pr = vertex_priority_queue_initalize(10);
 
     //create verticies
-    int no_vertex=100;
+    int no_vertex=100000;
     QueuedVertex ** q;
     q = malloc(no_vertex * sizeof(*q));
     for(int i =0; i< no_vertex; i++)
