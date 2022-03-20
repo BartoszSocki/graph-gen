@@ -23,7 +23,7 @@ static void _edge_node_append(EdgeNode **list, EdgeNode *elem) {
 static void _graph_add_directed_edge(Graph *graph, size_t beg_vertex, size_t end_vertex, double weight) {
 	if (!graph || !graph->edges)
 		return;
-	// cannot add edge when edge index is greater than graph size
+	/* cannot add edge when edge index is greater than graph size */
 	if (beg_vertex >= graph->rows * graph->cols || end_vertex >= graph->rows * graph->cols)
 		return;
 
@@ -32,7 +32,8 @@ static void _graph_add_directed_edge(Graph *graph, size_t beg_vertex, size_t end
 	_edge_node_append(a, edge_node_init(end_vertex, weight, NULL));
 }
 
-// in cardinal directions N, E, S, W
+/* w kierunkach kardynalnych */
+/* do tego skierowane w dwie strony */
 static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double min, double max) {
     if (!graph)
         return;
@@ -57,6 +58,7 @@ static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double mi
     }
 }
 
+/* zamienia "współrzędne x, y" na indeks w tablicy opisującej krawędzie grafu */
 int graph_xy_to_index(Graph* graph, int row, int col) {
 	return row * graph->cols + col;
 }
@@ -102,8 +104,12 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
     return graph;
 }
 
+/* TODO: dodaj opisy dla błędów formatu */
 Graph* graph_read_from_stdin() {
 	Graph *graph = malloc(sizeof(*graph));
+	if (!graph)
+		return NULL;
+
 	FILE *in = stdin;
 	char *buff = NULL;
 	size_t _buff_size;
@@ -112,25 +118,33 @@ Graph* graph_read_from_stdin() {
 		exit(EXIT_FAILURE);
 
 	int rows, cols;
-	sscanf(buff, "%d %d", &rows, &cols);
+	if (sscanf(buff, "%d %d", &rows, &cols) != 2)
+		exit(EXIT_FAILURE);
+
 	if (rows <= 0 || cols <= 0)
 		return NULL;
 
 	graph->rows = rows;
 	graph->cols = cols;
     graph->edges = calloc(graph->rows * graph->cols, sizeof(*graph->edges));
-    if (!graph->edges)
+    if (!graph->edges) {
+		graph_free(graph);
         return NULL;
+	}
 
 	for (int i = 0; i < graph->rows * graph->cols; i++) {
-		if (getline(&buff, &_buff_size, in) <= 0)
+		if (getline(&buff, &_buff_size, in) <= 0) {
+			graph_free(graph);
 			exit(EXIT_FAILURE);
+		}
 
-		int curr_len = 0;
+		/* indeks w lini pobranej za pomocą getline */
+		int line_index = 0;
+		/* długość lini */
 		int buff_len = strlen(buff);
 		char *buff_ptr = buff;
-		while (curr_len < buff_len) {
-			// need rename n to something better
+		while (line_index < buff_len) {
+			/* n jest ilością pobranych znaków przez sscanf */
 			int end_vertex, n;
 			double weight;
 			sscanf(buff_ptr, "%d : %lf %n", &end_vertex, &weight, &n);
@@ -138,7 +152,7 @@ Graph* graph_read_from_stdin() {
 			_graph_add_directed_edge(graph, i, end_vertex, weight);
 
 			buff_ptr += n;
-			curr_len += n;
+			line_index += n;
 		}
 	}
 
@@ -148,6 +162,7 @@ Graph* graph_read_from_stdin() {
 
 void graph_print_to_stdout(Graph *graph) {
     if (!graph) {
+		/* rozwiązanie tymczasowe */
         puts("0 0");
         return;
     }
