@@ -4,7 +4,10 @@
 #include "vertex_priority_queue.h"
 
 
-
+/*
+    RETURN CODE 0 MEANS THAT TEST PASSED
+    ANY OTHER CODE MEANS THAT TEST FAILED
+*/
 
 int main(int argc, char * argv[])
 {
@@ -28,10 +31,12 @@ int main(int argc, char * argv[])
     for(int i =0; i< no_vertex; i++)
         vertex_priority_queue_update(pr, i, no_vertex-i-1);
     //poll until the queue is empty
-    while(pr->size != 0)
+    //check if verticies are pulled in correct order
+    for(int i = 0; i < no_vertex;i++)
     {
-        QueuedVertex * a = vertex_priority_queue_poll(pr);
-        printf("Vertex(index=%d, dist=%g)\n", a->index, a->dist);
+        QueuedVertex * min_vert = vertex_priority_queue_poll(pr);
+        if(min_vert->index != no_vertex-1-i)
+            return 1;
     }
 
     //clean up
