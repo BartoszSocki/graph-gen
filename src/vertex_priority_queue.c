@@ -8,6 +8,7 @@
 #define GET_PARENT_INDEX(ci) (ci-1)/2 
 
 #define ALLOW_RESIZEING_QUEUE 0 
+
 #if ALLOW_RESIZEING_QUEUE 
 static void ensure_extra_capacity(VertexPriorityQueue * pr)
 {
@@ -167,4 +168,12 @@ void vertex_priority_queue_update(VertexPriorityQueue * pr, int index, double ne
         pr->verticies[index_of_element_to_be_updated]->dist = new_dist;
         heapify_up(pr, index_of_element_to_be_updated);
     }
+}
+
+void vertex_priority_queue_add_empty(VertexPriorityQueue * pr, int index)
+{
+    QueuedVertex * q = malloc(sizeof(*q));
+    q->index = index;
+    q->dist = DBL_MAX;
+    vertex_priority_queue_add(pr, q);
 }
