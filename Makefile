@@ -37,7 +37,7 @@ graphalgo_options_test_4:
 
 all:  graphalgo objs/vertex_priority_queue.o	
 
-test: 
+test: graphalgo build_test_pq 
 	@# PriorityQueue tests
 	@./bin/test_pq 1>/dev/null && echo "Vertex Priority Queue: passed" || echo "Vertex Priorty Queue: failed" 
 	@# Invalid Input tests
