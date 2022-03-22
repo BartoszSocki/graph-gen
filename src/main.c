@@ -5,7 +5,7 @@
 #include <time.h>
 #include "graph.h"
 
-static void _error_many_options(char* option_name) {
+static void error_many_options(char* option_name) {
 	fprintf(stderr, "graphalgo: %s passed multiple times\n", option_name);
 	exit(EXIT_FAILURE);
 }
@@ -19,12 +19,18 @@ int main(int argc, char** argv) {
 	int is_cols = 0;
 	int is_min = 0;
 	int is_max = 0;
+	int is_bfs = 0;
+	int is_dijkstra = 0;
+	int is_vert1 = 0;
+	int is_vert2 = 0;
 
 	long seed;
 	int rows;
 	int cols;
 	double min;
 	double max;
+	int vert1;
+	int vert2;
 
 	static struct option long_options[] = {
 		{"generate"	, optional_argument, 0, 'g'},
@@ -33,45 +39,71 @@ int main(int argc, char** argv) {
 		{"min"		, optional_argument, 0, 'n'},
 		{"max"		, optional_argument, 0, 'x'},
 		{"seed"		, optional_argument, 0, 's'},
+		{"bfs"		, optional_argument, 0, 'b'},
+		{"dijkstra"	, optional_argument, 0, 'd'},
+		{"vert1"	, optional_argument, 0, '1'}, // jeszcze do ustalenia
+		{"vert2"	, optional_argument, 0, '2'},
 		{0, 0, 0, 0}
 	};
 
-	while ((opt = getopt_long(argc, argv, "gs:r:c:n:x:", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "bgs:r:c:n:x:b:d:1:2:", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'g':
 				if (is_gen == 1)
-					_error_many_options("-g, --generate");
+					error_many_options("-g, --generate");
 				is_gen = 1;
 				break;
 			case 's':
 				if (is_seed == 1)
-					_error_many_options("-s, --seed");
+					error_many_options("-s, --seed");
 				is_seed = 1;
 				seed = atol(optarg);
 				break;
 			case 'r':
 				if (is_rows == 1)
-					_error_many_options("-r, --rows");
+					error_many_options("-r, --rows");
 				is_rows = 1;
 				rows = atoi(optarg);
 				break;
 			case 'c':
 				if (is_cols == 1)
-					_error_many_options("-c, --cols");
+					error_many_options("-c, --cols");
 				is_cols = 1;
 				cols = atoi(optarg);
 				break;
 			case 'n':
 				if (is_min == 1)
-					_error_many_options("-n, --min");
+					error_many_options("-n, --min");
 				is_min = 1;
 				min = atof(optarg);
 				break;
 			case 'x':
 				if (is_max == 1)
-					_error_many_options("-x, --max");
+					error_many_options("-x, --max");
 				is_max = 1;
 				max = atof(optarg);
+				break;
+			case 'b':
+				if (is_bfs == 1)
+					error_many_options("-b, --bfs");
+				is_bfs = 1;
+				break;
+			case 'd':
+				if (is_dijkstra == 1)
+					error_many_options("-d, --dijkstra");
+				is_dijkstra = 1;
+				break;
+			case '1':
+				if (is_vert1 == 1)
+					error_many_options("-1, --vert1");
+				is_vert1 = 1;
+				vert1 = atoi(optarg);
+				break;
+			case '2':
+				if (is_vert2 == 1)
+					error_many_options("2, --vert2");
+				is_vert2 = 1;
+				vert2 = atoi(optarg);
 				break;
 			default:
 				fprintf(stderr, "graphalgo: invalid flag\n");
@@ -95,6 +127,17 @@ int main(int argc, char** argv) {
 		Graph *graph = graph_generate_from_seed(rows, cols, min, max, seed);
 		graph_print_to_stdout(graph);
 		graph_free(graph);
+
+	} else if (is_bfs) {
+		Graph *graph = graph_read_from_stdin();
+		if (graph == NULL) {
+			fprintf(stderr, "graphalgo: invalid graph\n");
+			exit(EXIT_FAILURE);
+		}
+		graph_print_to_stdout(graph);
+
+	} else if (is_dijkstra && is_vert1 && is_vert2) {
+
 	} else {
 		fprintf(stderr, "graphalgo: not enough options passed\n");
 		exit(EXIT_FAILURE);
