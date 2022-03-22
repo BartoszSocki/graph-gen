@@ -7,8 +7,14 @@ objs/vertex_priority_queue.o: src/vertex_priority_queue.c src/vertex_priority_qu
 objs/graph.o: src/graph.c src/graph.h
 	cc $(CFLAGS) -c src/graph.c -o objs/graph.o
 
+objs/dijkstra.o: src/dijkstra.h src/dijkstra.c
+	cc $(CLAGS) -c src/dijkstra.c -o objs/dijkstra.o
+
 build_test_pq: objs/vertex_priority_queue.o
 	cc $(CFLAGS) tests/test_vertex_priority_queue.c objs/vertex_priority_queue.o -Isrc/ -o bin/test_pq 
+
+build_test_dijkstra: objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o
+	cc $(CFLAGS) tests/test_dijkstra.c objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o -Isrc/ -o bin/test_dijkstra 
 
 graphalgo: src/main.c objs/graph.o
 	cc $(CFLAGS) src/main.c objs/graph.o -o bin/graphalgo
