@@ -36,8 +36,10 @@ static int graph_generate_bidirectional_edges_cardinal(Graph *graph, double min,
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
             double weight = uniform_random(min, max);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
+			int res1 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
+			int res2 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
+			if (res1 || res2)
+				printf("index out of bounds\n");
         }
     }
 
@@ -45,14 +47,16 @@ static int graph_generate_bidirectional_edges_cardinal(Graph *graph, double min,
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols - 1; j++) {
             double weight = uniform_random(min, max);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
+			int res1 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
+			int res2 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
+			if (res1 || res2)
+				printf("index out of bounds\n");
         }
     }
 	return 0;
 }
 
-/* zamienia "współrzędne x, y" na indeks w tablicy opisującej krawędzie grafu */
+/* zamienia "współrzędne x, y" na indeks wierzchołka */
 int graph_xy_to_index(Graph* graph, int row, int col) {
 	return row * graph->cols + col;
 }
@@ -93,7 +97,12 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
     graph->cols = cols;
 
     srand(seed);
-    graph_generate_bidirectional_edges_cardinal(graph, min, max);
+	int res = graph_generate_bidirectional_edges_cardinal(graph, min, max);
+	if (res) {
+		puts("error occured during generation of graph edges");
+		graph_free(graph);
+		return NULL;
+	}
 
     return graph;
 }
