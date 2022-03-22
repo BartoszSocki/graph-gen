@@ -11,10 +11,11 @@
 
 int main(int argc, char * argv[])
 {
-    VertexPriorityQueue * pr = vertex_priority_queue_initalize(10);
+
+    int no_vertex=1000;
+    VertexPriorityQueue * pr = vertex_priority_queue_initalize(no_vertex);
 
     //create verticies
-    int no_vertex=20;
     QueuedVertex ** q;
     q = malloc(no_vertex * sizeof(*q));
     for(int i =0; i< no_vertex; i++)
@@ -37,7 +38,6 @@ int main(int argc, char * argv[])
         QueuedVertex * min_vert = vertex_priority_queue_poll(pr);
         if(min_vert->index != no_vertex-1-i)
             return 1;
-	printf("Vertex(index=%d, dist=%g)\n", min_vert->index, min_vert->dist);
     }
 
     //clean up
