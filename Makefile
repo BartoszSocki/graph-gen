@@ -1,5 +1,5 @@
 CFLAGS=-ggdb -Wall -pedantic --std=c99
-
+.DEFAULT_GOAL := all
 objs/vertex_priority_queue.o: src/vertex_priority_queue.c src/vertex_priority_queue.h
 	cc $(CFLAGS) -c src/vertex_priority_queue.c -o objs/vertex_priority_queue.o 
 
@@ -41,3 +41,7 @@ graphalgo_options_test_3:
 	@-./bin/graphalgo --generate --rows=4 --cols=4 --min=0 --max=1 --seed=0 > tests/out2
 	@diff tests/out1 tests/out2
 	@rm tests/out1 tests/out2
+graphalgo_options_test_4:
+	./bin/graphalgo -g -r 10 -c 10 --min=0 --max=1 -s 0
+all:  graphalgo objs/vertex_priority_queue.o	
+test: graphalgo_options_test_4 test_pq
