@@ -3,21 +3,21 @@
 
 #include <stdlib.h>
 
-typedef struct _EdgeNode {
-	struct _EdgeNode* next;
+typedef struct _Edge {
+	struct _Edge* next;
 	int end_vertex;
 	double weight;
-} EdgeNode;
+} Edge;
 
 typedef struct _Graph {
 	/* tablica list krawędzi, gdzie edges[i] jest listą krawędzi z wierzchołka i */
-	EdgeNode** edges;
+	Edge** edges;
 	size_t rows;
 	size_t cols;
 } Graph;
 
-EdgeNode* edge_node_init(int connected_vertex, double weight, EdgeNode* next);
-void edge_node_free(EdgeNode* edge);
+Edge* edge_init(int connected_vertex, double weight, Edge* next);
+void edge_free(Edge* edge);
 
 Graph* graph_generate_from_seed(int rows, int cols, double from, double to, long seed);
 
