@@ -3,8 +3,12 @@
 #include <stdlib.h> // malloc, realloc
 #include <float.h> //DBL_MAX
 
+#define GET_LEFT_CHILD_INDEX(pi) 2*pi+1
+#define GET_RIGHT_CHILD_INDEX(pi) 2*pi+2
+#define GET_PARENT_INDEX(ci) (ci-1)/2 
 
-
+#define ALLOW_RESIZEING_QUEUE 0 
+#if ALLOW_RESIZEING_QUEUE 
 static void ensure_extra_capacity(VertexPriorityQueue * pr)
 {
     if(pr->size == pr->capacity)
@@ -29,11 +33,7 @@ static void ensure_extra_capacity(VertexPriorityQueue * pr)
         pr->capacity *=2;
     }
 }
-
-
-static int get_left_child_index(int parent_index) {return 2*parent_index + 1;}
-static int get_right_child_index(int parent_index) {return 2*parent_index + 2;}
-static int get_parent_index(int childIndex) {return (childIndex-1)/2;}
+#endif
 
 static void swap_queued_vertex(VertexPriorityQueue * pr, int a_index, int b_index)
 {
@@ -54,7 +54,7 @@ static void swap_queued_vertex(VertexPriorityQueue * pr, int a_index, int b_inde
 static void heapify_up(VertexPriorityQueue * pr, int in)
 {
     int index = in;
-    int parent_index = get_parent_index(index);
+    int parent_index = GET_PARENT_INDEX(index);
 
     //move up the tree and swap elements until the order is restored
     while((parent_index >= 0) && (pr->verticies[parent_index]->dist > pr->verticies[index]->dist))
@@ -62,15 +62,15 @@ static void heapify_up(VertexPriorityQueue * pr, int in)
         swap_queued_vertex(pr, index, parent_index);
 
         index = parent_index;
-        parent_index = get_parent_index(index);
+        parent_index = GET_PARENT_INDEX(index);
     }
 } 
 
 static void heapify_down(VertexPriorityQueue * pr, int in)
 {
     int index = in;
-    int left_child_index = get_left_child_index(index);
-    int right_child_index = get_right_child_index(index);
+    int left_child_index = GET_LEFT_CHILD_INDEX(index);
+    int right_child_index = GET_RIGHT_CHILD_INDEX(index);
 
     //move down the tree and swap elements until the order is restored
     while(left_child_index < pr->size)
@@ -86,8 +86,8 @@ static void heapify_down(VertexPriorityQueue * pr, int in)
         swap_queued_vertex(pr, index, smaller_child_index);
 
         index = smaller_child_index;
-        left_child_index = get_left_child_index(index);
-        right_child_index = get_right_child_index(index);
+        left_child_index = GET_LEFT_CHILD_INDEX(index);
+        right_child_index = GET_RIGHT_CHILD_INDEX(index);
     }
 } 
 
@@ -111,7 +111,9 @@ QueuedVertex * vertex_priority_queue_poll(VertexPriorityQueue * pr)
 
 void vertex_priority_queue_add(VertexPriorityQueue * pr, QueuedVertex * item)
 {
+    #if ALLOW_RESIZEING_QUEUE 
     ensure_extra_capacity(pr);
+    #endif
 
     //add element to the end
     pr->verticies[pr->size] = item;
