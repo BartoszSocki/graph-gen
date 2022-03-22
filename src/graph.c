@@ -3,59 +3,53 @@
 #include <string.h>
 #include "graph.h"
 
-static double _uniform_random(double min, double max) {
+static double uniform_random(double min, double max) {
 	return min + ((double) rand() * (max - min)) / RAND_MAX;
 }
 
-static void _edge_node_append(EdgeNode **list, EdgeNode *elem) {
-    EdgeNode *dummy = *list;
-    if (!dummy) {
-		*list = elem;
-		return;
-	}
-
-    while (dummy && dummy->next)
-        dummy = dummy->next;
-
-    dummy->next = elem;
-}
-
-static void _graph_add_directed_edge(Graph *graph, size_t beg_vertex, size_t end_vertex, double weight) {
-	if (!graph || !graph->edges)
-		return;
-	/* cannot add edge when edge index is greater than graph size */
+/* zwraca 0 jak udało się dodać krawędź */
+static int graph_add_directed_edge(Graph *graph, size_t beg_vertex, size_t end_vertex, double weight) {
+	if (graph == NULL || graph->edges == NULL)
+		return 1;
+	/* indeks wierzchołka jest większy niż ilość wierzchołków w grafie */
 	if (beg_vertex >= graph->rows * graph->cols || end_vertex >= graph->rows * graph->cols)
-		return;
+		return 1;
 
-	EdgeNode **a = &(graph->edges[beg_vertex]);
+	Edge* new_edge = edge_init(end_vertex, weight, graph->edges[beg_vertex]);
+	if (new_edge == NULL)
+		return 1;
 
-	_edge_node_append(a, edge_node_init(end_vertex, weight, NULL));
+	graph->edges[beg_vertex] = new_edge;
+	return 0;
 }
 
 /* w kierunkach kardynalnych */
 /* do tego skierowane w dwie strony */
-static void _graph_generate_bidirectional_edges_cardinal(Graph *graph, double min, double max) {
-    if (!graph)
-        return;
+static int graph_generate_bidirectional_edges_cardinal(Graph *graph, double min, double max) {
+    if (graph == NULL)
+        return 1;
 
 	if (min > max)
-		return;
+		return 1;
 
+	/* łączenie wierzchołków, "górny z dolnym" */
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
-            double weight = _uniform_random(min, max);
-			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
-			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
+            double weight = uniform_random(min, max);
+			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
+			graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
         }
     }
 
+	/* łączenie wierzchołków, "lewy z prawym" */
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols - 1; j++) {
-            double weight = _uniform_random(min, max);
-			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
-			_graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
+            double weight = uniform_random(min, max);
+			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
+			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
         }
     }
+	return 0;
 }
 
 /* zamienia "współrzędne x, y" na indeks w tablicy opisującej krawędzie grafu */
@@ -63,9 +57,9 @@ int graph_xy_to_index(Graph* graph, int row, int col) {
 	return row * graph->cols + col;
 }
 
-EdgeNode* edge_node_init(int end_vertex, double weight, EdgeNode *next) {
-    EdgeNode* edge = malloc(sizeof(*edge));
-    if (!edge)
+Edge* edge_init(int end_vertex, double weight, Edge *next) {
+    Edge* edge = malloc(sizeof(*edge));
+    if (edge == NULL)
         return NULL;
 
 	edge->end_vertex = end_vertex;
@@ -78,11 +72,11 @@ EdgeNode* edge_node_init(int end_vertex, double weight, EdgeNode *next) {
 Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long seed) {
 	Graph* graph = malloc(sizeof(*graph));
 
-    if (!graph)
+    if (graph == NULL)
         return NULL;
 
     graph->edges = calloc(rows * cols, sizeof(*graph->edges));
-    if (!graph->edges)
+    if (graph->edges == NULL)
         return NULL;
 
 	if (rows <= 0 || cols <= 0) {
@@ -99,7 +93,7 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
     graph->cols = cols;
 
     srand(seed);
-    _graph_generate_bidirectional_edges_cardinal(graph, min, max);
+    graph_generate_bidirectional_edges_cardinal(graph, min, max);
 
     return graph;
 }
@@ -107,18 +101,18 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
 /* TODO: dodaj opisy dla błędów formatu */
 Graph* graph_read_from_stdin() {
 	Graph *graph = malloc(sizeof(*graph));
-	if (!graph)
+	if (graph == NULL)
 		return NULL;
 
-	FILE *in = stdin;
-	char *buff = NULL;
-	size_t _buff_size;
+	char *line = NULL;
+	/* ile bajtów zaalokowanych */
+	size_t line_size;
 
-	if (getline(&buff, &_buff_size, in) <= 0)
+	if (getline(&line, &line_size, stdin) <= 0)
 		exit(EXIT_FAILURE);
 
 	int rows, cols;
-	if (sscanf(buff, "%d %d", &rows, &cols) != 2)
+	if (sscanf(line, "%d %d", &rows, &cols) != 2)
 		exit(EXIT_FAILURE);
 
 	if (rows <= 0 || cols <= 0)
@@ -127,50 +121,45 @@ Graph* graph_read_from_stdin() {
 	graph->rows = rows;
 	graph->cols = cols;
     graph->edges = calloc(graph->rows * graph->cols, sizeof(*graph->edges));
-    if (!graph->edges) {
+    if (graph->edges == NULL) {
 		graph_free(graph);
         return NULL;
 	}
 
 	for (int i = 0; i < graph->rows * graph->cols; i++) {
-		if (getline(&buff, &_buff_size, in) <= 0) {
+		if (getline(&line, &line_size, stdin) <= 0) {
 			graph_free(graph);
 			exit(EXIT_FAILURE);
 		}
 
-		/* indeks w lini pobranej za pomocą getline */
-		int line_index = 0;
-		/* długość lini */
-		int buff_len = strlen(buff);
-		char *buff_ptr = buff;
-		while (line_index < buff_len) {
-			/* n jest ilością pobranych znaków przez sscanf */
+		int index = 0;
+		int line_len = strlen(line);
+
+		while (index < line_len) {
 			int end_vertex, n;
 			double weight;
-			sscanf(buff_ptr, "%d : %lf %n", &end_vertex, &weight, &n);
+			sscanf(line + index, "%d : %lf %n", &end_vertex, &weight, &n);
 
-			_graph_add_directed_edge(graph, i, end_vertex, weight);
+			graph_add_directed_edge(graph, i, end_vertex, weight);
 
-			buff_ptr += n;
-			line_index += n;
+			index += n;
 		}
 	}
 
-	free(buff);
+	free(line);
 	return graph;
 }
 
 void graph_print_to_stdout(Graph *graph) {
-    if (!graph) {
-		/* rozwiązanie tymczasowe */
-        puts("0 0");
+    if (graph == NULL) {
+        puts("(null)");
         return;
     }
 
     printf("%zu %zu\n", graph->rows, graph->cols);
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols; j++) {
-            EdgeNode* dummy = graph->edges[graph_xy_to_index(graph, i, j)];
+            Edge* dummy = graph->edges[graph_xy_to_index(graph, i, j)];
 			printf("\t");
             while (dummy) {
                 printf("%u :%lf  ", dummy->end_vertex, dummy->weight);
@@ -181,8 +170,8 @@ void graph_print_to_stdout(Graph *graph) {
     }
 }
 
-void edge_node_free(EdgeNode* edge) {
-	EdgeNode *prev;
+void edge_free(Edge* edge) {
+	Edge *prev;
 	while (edge) {
 		prev = edge;
 		prev->next = NULL;
@@ -193,16 +182,16 @@ void edge_node_free(EdgeNode* edge) {
 }
 
 void graph_free(Graph* graph) {
-	if (!graph)
+	if (graph == NULL)
 		return;
 
-	if (!graph->edges) {
+	if (graph->edges == NULL) {
 		free(graph);
 		return;
 	}
 
 	for (int i = 0; i < graph->rows * graph->cols; i++)
-		edge_node_free(graph->edges[i]);
+		edge_free(graph->edges[i]);
 
 	free(graph->edges);
 	free(graph);
