@@ -16,8 +16,8 @@ build_test_pq: objs/vertex_priority_queue.o
 build_test_dijkstra: objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o
 	cc $(CFLAGS) tests/test_dijkstra.c objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o -Isrc/ -o bin/test_dijkstra 
 
-graphalgo: src/main.c objs/graph.o
-	cc $(CFLAGS) src/main.c objs/graph.o -o bin/graphalgo
+graphalgo: src/main.c objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o
+	cc $(CFLAGS) src/main.c objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o -o bin/graphalgo
 
 
 graphalgo_options_test_1:
@@ -43,7 +43,8 @@ graphalgo_options_test_4:
 
 all:  graphalgo objs/vertex_priority_queue.o	
 
-test: graphalgo build_test_pq 
+test: graphalgo build_test_pq build_test_dijkstra 
+	@./bin/test_dijkstra 1>/dev/null && echo "Dijkstra : passed" || echo "Dijkstra: failed" 
 	@# PriorityQueue tests
 	@./bin/test_pq 1>/dev/null && echo "Vertex Priority Queue: passed" || echo "Vertex Priorty Queue: failed" 
 	@# Invalid Input tests

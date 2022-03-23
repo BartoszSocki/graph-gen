@@ -7,35 +7,6 @@
 #define GET_RIGHT_CHILD_INDEX(pi) 2*pi+2
 #define GET_PARENT_INDEX(ci) (ci-1)/2 
 
-#define ALLOW_RESIZEING_QUEUE 0 
-
-#if ALLOW_RESIZEING_QUEUE 
-static void ensure_extra_capacity(VertexPriorityQueue * pr)
-{
-    if(pr->size == pr->capacity)
-    {
-        QueuedVertex ** new_verticies_pointer = NULL;
-        int * new_vertex_index_pointer = NULL;
-
-
-        new_verticies_pointer =  realloc(pr->verticies, pr->capacity * 2 * sizeof(*pr->verticies));
-        new_vertex_index_pointer = realloc(pr->verticies_indexes, pr->capacity * 2 * sizeof(*pr->verticies_indexes));
-
-        if((new_verticies_pointer == NULL) || (new_vertex_index_pointer == NULL))
-        {
-            fprintf(stderr, "ERROR: can't reallocate elements.\n");
-        }
-        else
-        {
-            pr->verticies = new_verticies_pointer;
-            pr->verticies_indexes = new_vertex_index_pointer;
-        }
-
-        pr->capacity *=2;
-    }
-}
-#endif
-
 static void swap_queued_vertex(VertexPriorityQueue * pr, int a_index, int b_index)
 {
     QueuedVertex ** array = pr->verticies; 
@@ -112,10 +83,6 @@ QueuedVertex * vertex_priority_queue_poll(VertexPriorityQueue * pr)
 
 void vertex_priority_queue_add(VertexPriorityQueue * pr, QueuedVertex * item)
 {
-    #if ALLOW_RESIZEING_QUEUE 
-    ensure_extra_capacity(pr);
-    #endif
-
     //add element to the end
     pr->verticies[pr->size] = item;
     pr->verticies_indexes[item->index] = pr->size;

@@ -4,6 +4,7 @@
 #include <getopt.h>
 #include <time.h>
 #include "graph.h"
+#include "dijkstra.h"
 
 static void error_many_options(char* option_name) {
 	fprintf(stderr, "graphalgo: %s passed multiple times\n", option_name);
@@ -101,7 +102,7 @@ int main(int argc, char** argv) {
 				break;
 			case '2':
 				if (is_vert2 == 1)
-					error_many_options("2, --vert2");
+					error_many_options("-2, --vert2");
 				is_vert2 = 1;
 				vert2 = atoi(optarg);
 				break;
@@ -112,6 +113,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	printf("%d %d\n", is_dijkstra, is_vert1);
 	if (is_seed == 0)
 		seed = time(NULL);
 
@@ -137,7 +139,21 @@ int main(int argc, char** argv) {
 		graph_print_to_stdout(graph);
 
 	} else if (is_dijkstra && is_vert1 && is_vert2) {
-
+		Graph * graph = graph_read_from_stdin();
+		if(graph==NULL)
+		{
+			fprintf(stderr, "graphalgo: invalid graph\n");
+			exit(EXIT_FAILURE);
+		}
+		if(vert1 >= graph->cols * graph->rows || vert2 >= graph->cols * graph->rows)
+		{
+			fprintf(stderr, "graphalgo: dijkstra: the specified verticies are not the part of the graph.\n");
+			exit(EXIT_FAILURE);
+		}
+		DijkstraResult * result = dijkstra(graph, vert1);
+		dijkstra_print_result(result);
+		dijkstra_print_path(result, vert2);
+		dijkstra_result_free(result);
 	} else {
 		fprintf(stderr, "graphalgo: not enough options passed\n");
 		exit(EXIT_FAILURE);
