@@ -43,12 +43,12 @@ int main(int argc, char** argv) {
 		{"seed"		, optional_argument, 0, 's'},
 		{"bfs"		, optional_argument, 0, 'b'},
 		{"dijkstra"	, optional_argument, 0, 'd'},
-		{"vert1"	, optional_argument, 0, '1'}, // jeszcze do ustalenia
+		{"vert1"	, optional_argument, 0, '1'},
 		{"vert2"	, optional_argument, 0, '2'},
 		{0, 0, 0, 0}
 	};
 
-	while ((opt = getopt_long(argc, argv, "bgs:r:c:n:x:b:d:1:2:", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "bdgs:r:c:n:x:b:1:2:", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'g':
 				if (is_gen == 1)
@@ -114,7 +114,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	printf("%d %d\n", is_dijkstra, is_vert1);
+	/* printf("%d %d %d\n", is_dijkstra, is_vert1, is_vert2); */
 	if (is_seed == 0)
 		seed = time(NULL);
 
@@ -160,6 +160,7 @@ int main(int argc, char** argv) {
 		dijkstra_print_result(result);
 		dijkstra_print_path(result, vert2);
 		dijkstra_result_free(result);
+
 	} else {
 		fprintf(stderr, "graphalgo: not enough options passed\n");
 		exit(EXIT_FAILURE);

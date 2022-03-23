@@ -20,4 +20,5 @@ void dijkstra_result_free(DijkstraResult * result);
 void dijkstra_print_result(DijkstraResult * res);
 
 void dijkstra_print_path(DijkstraResult * res, int to);
+
 #endif

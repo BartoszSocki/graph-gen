@@ -16,14 +16,14 @@ objs/dijkstra.o: src/dijkstra.h src/dijkstra.c
 build_test_pq: objs/vertex_priority_queue.o
 	cc $(CFLAGS) tests/test_vertex_priority_queue.c objs/vertex_priority_queue.o -Isrc/ -o bin/test_pq 
 
-graphalgo: src/main.c objs/graph.o src/bfs.o
-	cc $(CFLAGS) src/main.c objs/graph.o src/bfs.o -o bin/graphalgo
+graphalgo: src/main.c objs/graph.o objs/bfs.o
+	cc $(CFLAGS) src/main.c objs/graph.o objs/bfs.o -o bin/graphalgo
 
 build_test_dijkstra: objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o
 	cc $(CFLAGS) tests/test_dijkstra.c objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o -Isrc/ -o bin/test_dijkstra 
 
-graphalgo: src/main.c objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o
-	cc $(CFLAGS) src/main.c objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o -o bin/graphalgo
+graphalgo: src/main.c objs/bfs.o objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o
+	cc $(CFLAGS) src/main.c objs/bfs.o objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o -o bin/graphalgo
 
 all:  graphalgo objs/vertex_priority_queue.o	
 
