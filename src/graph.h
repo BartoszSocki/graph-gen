@@ -3,13 +3,13 @@
 
 #include <stdlib.h>
 
-typedef struct _Edge {
-	struct _Edge* next;
+typedef struct Edge_t {
+	struct Edge_t* next;
 	int end_vertex;
 	double weight;
 } Edge;
 
-typedef struct _Graph {
+typedef struct {
 	/* tablica list krawędzi, gdzie edges[i] jest listą krawędzi z wierzchołka i */
 	Edge** edges;
 	size_t rows;

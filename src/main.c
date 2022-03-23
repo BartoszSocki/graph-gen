@@ -4,6 +4,7 @@
 #include <getopt.h>
 #include <time.h>
 #include "graph.h"
+#include "bfs.h"
 
 static void error_many_options(char* option_name) {
 	fprintf(stderr, "graphalgo: %s passed multiple times\n", option_name);
@@ -115,7 +116,9 @@ int main(int argc, char** argv) {
 	if (is_seed == 0)
 		seed = time(NULL);
 
-	if (is_gen && is_rows && is_cols && is_min && is_max) {
+	int is_generation_selected = is_gen && is_rows && is_cols && is_min && is_max;
+
+	if (is_generation_selected) {
 		if (rows < 1 || cols < 1) {
 			fprintf(stderr, "graphalgo: rows or cols cannot be smaller than 1\n");
 			exit(EXIT_FAILURE);
@@ -128,13 +131,16 @@ int main(int argc, char** argv) {
 		graph_print_to_stdout(graph);
 		graph_free(graph);
 
-	} else if (is_bfs) {
+	} else if (is_bfs && is_vert1) {
 		Graph *graph = graph_read_from_stdin();
 		if (graph == NULL) {
 			fprintf(stderr, "graphalgo: invalid graph\n");
 			exit(EXIT_FAILURE);
+		} else if (vert1 < 0 || vert1 >= graph->cols * graph->rows) {
+			fprintf(stderr, "graphalgo: invalid vertex index\n");
+			exit(EXIT_FAILURE);
 		}
-		graph_print_to_stdout(graph);
+		bfs_print_result(bfs(graph, vert1));
 
 	} else if (is_dijkstra && is_vert1 && is_vert2) {
 

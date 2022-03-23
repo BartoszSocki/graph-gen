@@ -36,8 +36,12 @@ static int graph_generate_bidirectional_edges_cardinal(Graph *graph, double min,
     for (int i = 0; i < graph->rows - 1; i++) {
         for (int j = 0; j < graph->cols; j++) {
             double weight = uniform_random(min, max);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
+			int res1 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
+			int res2 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
+			if (res1 || res2) {
+				/* printf("index out of bounds\n"); */
+				return 1;
+			}
         }
     }
 
@@ -45,14 +49,18 @@ static int graph_generate_bidirectional_edges_cardinal(Graph *graph, double min,
     for (int i = 0; i < graph->rows; i++) {
         for (int j = 0; j < graph->cols - 1; j++) {
             double weight = uniform_random(min, max);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
-			graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
+			int res1 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
+			int res2 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
+			if (res1 || res2) {
+				/* printf("index out of bounds\n"); */
+				return 1;
+			}
         }
     }
 	return 0;
 }
 
-/* zamienia "współrzędne x, y" na indeks w tablicy opisującej krawędzie grafu */
+/* zamienia "współrzędne x, y" na indeks wierzchołka */
 int graph_xy_to_index(Graph* graph, int row, int col) {
 	return row * graph->cols + col;
 }
@@ -93,30 +101,45 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
     graph->cols = cols;
 
     srand(seed);
-    graph_generate_bidirectional_edges_cardinal(graph, min, max);
+	int res = graph_generate_bidirectional_edges_cardinal(graph, min, max);
+	if (res) {
+		/* puts("error occured during generation of graph edges"); */
+		graph_free(graph);
+		return NULL;
+	}
 
     return graph;
 }
 
-/* TODO: dodaj opisy dla błędów formatu */
 Graph* graph_read_from_stdin() {
 	Graph *graph = malloc(sizeof(*graph));
 	if (graph == NULL)
 		return NULL;
 
 	char *line = NULL;
-	/* ile bajtów zaalokowanych */
+	/* ile bajtów bufora zaalokowano */
 	size_t line_size;
 
-	if (getline(&line, &line_size, stdin) <= 0)
+	if (getline(&line, &line_size, stdin) < 1) {
+		fprintf(stderr, "graphalgo: unexpected EOF at first line\n");
+		graph_free(graph);
 		exit(EXIT_FAILURE);
+	}
 
 	int rows, cols;
-	if (sscanf(line, "%d %d", &rows, &cols) != 2)
+	/* nie podano wszystkich wymiarów grafu */
+	if (sscanf(line, "%d %d", &rows, &cols) != 2) {
+		fprintf(stderr, "graphalgo: invalid number of graph dimensions\n");
+		graph_free(graph);
 		exit(EXIT_FAILURE);
+	}
 
-	if (rows <= 0 || cols <= 0)
-		return NULL;
+
+	if (rows <= 0 || cols <= 0) {
+		fprintf(stderr, "graphalgo: invalid values of graph dimensions\n");
+		graph_free(graph);
+		exit(EXIT_FAILURE);
+	}
 
 	graph->rows = rows;
 	graph->cols = cols;
@@ -127,7 +150,8 @@ Graph* graph_read_from_stdin() {
 	}
 
 	for (int i = 0; i < graph->rows * graph->cols; i++) {
-		if (getline(&line, &line_size, stdin) <= 0) {
+		if (getline(&line, &line_size, stdin) < 1) {
+			fprintf(stderr, "graphalgo: file incomplete\n");
 			graph_free(graph);
 			exit(EXIT_FAILURE);
 		}
@@ -138,10 +162,26 @@ Graph* graph_read_from_stdin() {
 		while (index < line_len) {
 			int end_vertex, n;
 			double weight;
-			sscanf(line + index, "%d : %lf %n", &end_vertex, &weight, &n);
+			int assigned_values = sscanf(line + index, "%d : %lf %n", &end_vertex, &weight, &n);
 
-			graph_add_directed_edge(graph, i, end_vertex, weight);
+			/* niekompletny opis krawędzi */
+			if (assigned_values == 1) {
+				fprintf(stderr, "graphalgo: file incomplete\n");
+				graph_free(graph);
+				exit(EXIT_FAILURE);
+			}
+				
+			/* nie podano krawędzi */
+			if (assigned_values < 1)
+				break;
 
+			/* wierzchołek poza grafem */
+			if (graph_add_directed_edge(graph, i, end_vertex, weight) != 0) {
+				fprintf(stderr, "graphalgo: invalid vertex index\n");
+				graph_free(graph);
+				exit(EXIT_FAILURE);
+			}
+			printf("%d %d\n", index, line_len);
 			index += n;
 		}
 	}
