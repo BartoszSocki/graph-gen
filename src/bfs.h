@@ -2,9 +2,11 @@
 #define _BFS_H_
 
 #include <stdlib.h>
+#include <stdbool.h>
 #include "graph.h"
 
 typedef struct {
+	bool *visited;
 	int *verticies;
 	double *weights;
 

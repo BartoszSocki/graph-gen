@@ -141,6 +141,7 @@ int main(int argc, char** argv) {
 			exit(EXIT_FAILURE);
 		}
 		bfs_print_result(bfs(graph, vert1));
+
 	} else if (is_dijkstra && is_vert1 && is_vert2) {
 
 	} else {
