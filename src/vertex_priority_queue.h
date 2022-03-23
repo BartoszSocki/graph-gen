@@ -25,6 +25,7 @@ void vertex_priority_queue_free(VertexPriorityQueue * pr);
 
 
 void vertex_priority_queue_add(VertexPriorityQueue * pr, QueuedVertex * item);
+void vertex_priority_queue_add_empty(VertexPriorityQueue * pr, int index);
 QueuedVertex *  vertex_priority_queue_poll(VertexPriorityQueue * pr);
 void vertex_priority_queue_update(VertexPriorityQueue * pr, int index, double new_dist);
 
