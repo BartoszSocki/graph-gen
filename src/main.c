@@ -176,7 +176,9 @@ int main(int argc, char** argv) {
 			fprintf(stderr, "graphalgo: invalid vertex index\n");
 			exit(EXIT_FAILURE);
 		}
-		bfs_print_result(bfs(graph, prog_args.vert1));
+		BFSResult *result = bfs(graph, prog_args.vert1);
+		bfs_print_result(result);
+		bfs_result_free(result);
 
 	} else if (is_dijkstra_selected(&prog_args)) {
 		Graph * graph = graph_read_from_stdin();
