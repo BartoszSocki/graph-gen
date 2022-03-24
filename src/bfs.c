@@ -28,8 +28,8 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 		return NULL;
 
 	result->visited = calloc(graph_size, sizeof(*(result->visited)));
-	result->verticies = malloc(graph_size * sizeof(*(result->verticies)));
-	result->weights = malloc(graph_size * sizeof(*(result->weights)));
+	result->verticies = calloc(graph_size, sizeof(*(result->verticies)));
+	result->weights = calloc(graph_size, sizeof(*(result->weights)));
 	result->size = graph_size;
 
 	if (result->verticies == NULL || result->weights == NULL || result->visited == NULL) {
@@ -46,7 +46,7 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 
 	result->verticies[0] = start_vertex;
 	result->weights[0] = 0;
-	result->visited[0] = true;
+	result->visited[start_vertex] = true;
 
 	while (beg_index < end_index) {
 		int curr_vertex = result->verticies[beg_index++];
@@ -62,4 +62,13 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 		}
 	}
 	return result;
+}
+
+void bfs_result_free(BFSResult* result) {
+	if (result == NULL)
+		return;
+	free(result->visited);
+	free(result->weights);
+	free(result->verticies);
+	free(result);
 }

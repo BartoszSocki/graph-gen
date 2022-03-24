@@ -181,7 +181,6 @@ Graph* graph_read_from_stdin() {
 				graph_free(graph);
 				exit(EXIT_FAILURE);
 			}
-			printf("%d %d\n", index, line_len);
 			index += n;
 		}
 	}

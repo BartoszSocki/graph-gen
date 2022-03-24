@@ -15,5 +15,6 @@ typedef struct {
 
 BFSResult *bfs(Graph* graph, int start_vertex);
 void bfs_print_result(BFSResult *result);
+void bfs_result_free(BFSResult *result);
 
 #endif
