@@ -1,4 +1,4 @@
-CFLAGS=-ggdb -Wall -pedantic --std=c99
+CFLAGS=-ggdb -Wall -pedantic --std=c99 -Wmisleading-indentation
 .DEFAULT_GOAL := all
 
 objs/vertex_priority_queue.o: src/vertex_priority_queue.c src/vertex_priority_queue.h
@@ -33,6 +33,7 @@ test: graphalgo build_test_pq build_test_dijkstra
 	@./bin/test_pq 1>/dev/null && echo "Vertex Priority Queue: passed" || echo "Vertex Priorty Queue: failed" 
 	@# Invalid Input tests
 	@bash ./tests/main_args_tests.sh
+	@bash ./tests/valgrind_tests.sh
 
 clean:
 	rm -rf objs/*

@@ -233,5 +233,5 @@ void graph_free(Graph* graph) {
 
 	free(graph->edges);
 	free(graph);
-n	graph = NULL;
+	graph = NULL;
 }

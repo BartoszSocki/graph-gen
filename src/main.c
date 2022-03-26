@@ -200,6 +200,7 @@ int main(int argc, char** argv) {
 		BFSResult *result = bfs(graph, prog_args.vert1);
 		bfs_print_result(result);
 		bfs_result_free(result);
+		graph_free(graph);
 
 	} else if (is_dijkstra_selected(&prog_args)) {
 		Graph * graph = graph_read_from_stdin();
@@ -210,6 +211,7 @@ int main(int argc, char** argv) {
 		}
 		if(prog_args.vert1 >= graph->cols * graph->rows || prog_args.vert2 >= graph->cols * graph->rows)
 		{
+			graph_free(graph);
 			fprintf(stderr, "graphalgo: dijkstra: the specified verticies are not the part of the graph.\n");
 			exit(EXIT_FAILURE);
 		}
@@ -217,6 +219,7 @@ int main(int argc, char** argv) {
 		dijkstra_print_result(result);
 		dijkstra_print_path(result, prog_args.vert2);
 		dijkstra_result_free(result);
+		graph_free(graph);
 
 	} else {
 		fprintf(stderr, "graphalgo: unfamiliar combination of program options\n");
