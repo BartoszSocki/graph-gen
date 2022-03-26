@@ -213,7 +213,6 @@ void edge_free(Edge* edge) {
 	Edge *prev;
 	while (edge) {
 		prev = edge;
-		prev->next = NULL;
 		edge = edge->next;
 		free(prev);
 	}
@@ -234,5 +233,5 @@ void graph_free(Graph* graph) {
 
 	free(graph->edges);
 	free(graph);
-	graph = NULL;
+n	graph = NULL;
 }
