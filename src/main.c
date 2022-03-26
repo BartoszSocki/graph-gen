@@ -8,6 +8,7 @@
 #include "dijkstra.h"
 
 typedef struct {
+	int is_help;
 	int is_gen;
 	int is_seed;
 	int is_rows;
@@ -46,7 +47,7 @@ static struct option long_options[] = {
 static int is_gen_selected(ProgArgs* a) {
 	if (a == NULL)
 		return 0;
-	int is_gen = a->is_gen && a->is_rows && a->is_cols && a->is_min && a->is_min;
+	int is_gen = a->is_gen && a->is_rows && a->is_cols && a->is_min && a->is_max;
 	int is_other = a->is_bfs || a->is_dijkstra || a->is_vert1 || a->is_vert2;
 	return is_gen && (!is_other);
 }
@@ -67,8 +68,23 @@ static int is_dijkstra_selected(ProgArgs* a) {
 	return is_dijkstra && (!is_other);
 }
 
+static int is_help_selected(ProgArgs* a) {
+	if (a == NULL)
+		return 0;
+	int is_other = a->is_gen || a->is_rows || a->is_cols || a->is_min || a->is_max || a->is_bfs || a->is_dijkstra || a->is_seed || a->is_vert1 || a->is_vert2;
+	return a->is_help  && (!is_other);
+}
+
 static void print_prog_help() {
-	printf("TODO: hello this is program help");
+	printf("graph generation:\n");
+	printf("graphalgo --generate --rows=<ROWS> --cols=<COLS> --min=<MIN> --max=<MAX> [--seed=<SEED>]\n");
+	printf("graphalgo -g -r<ROWS> -c<COLS> -n<MIN> -x<MAX> [-s<SEED>]\n");
+	printf("bfs:\n");
+	printf("graphalgo --bfs --vert1=<VERT1>\n");
+	printf("graphalgo -b -1<VERT1>\n");
+	printf("dijkstra:\n");
+	printf("graphalgo --dijkstra --vert1=<VERT1> --vert2=<VERT2>\n");
+	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
 
 static void error_many_options(char* option_name) {
@@ -80,11 +96,12 @@ int main(int argc, char** argv) {
 	int opt, long_index = 0;
 	ProgArgs prog_args = {0};
 
-	while ((opt = getopt_long(argc, argv, "hbdgs:r:c:n:x:b:1:2:", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, ":hbdgs:r:c:n:x:b:1:2:", long_options, &long_index)) != -1) {
 		switch (opt) {
 			case 'h':
-				print_prog_help();
-				exit(EXIT_SUCCESS);
+				if (prog_args.is_help == 1)
+					error_many_options("-h, --help");
+				prog_args.is_help = 1;
 				break;
 			case 'g':
 				if (prog_args.is_gen == 1)
@@ -154,9 +171,13 @@ int main(int argc, char** argv) {
 	if (prog_args.is_seed == 0)
 		prog_args.seed = time(NULL);
 
-	if (is_gen_selected(&prog_args)) {
+	if (is_help_selected(&prog_args)) {
+		print_prog_help();
+		exit(EXIT_SUCCESS);
+
+	} else if (is_gen_selected(&prog_args)) {
 		if (prog_args.rows < 1 || prog_args.cols < 1) {
-			fprintf(stderr, "graphalgo: rows or cols cannot be smaller than 1\n");
+			fprintf(stderr, "graphalgo: rows and cols cannot be smaller than 1\n");
 			exit(EXIT_FAILURE);
 		} else if (prog_args.min > prog_args.max) {
 			fprintf(stderr, "graphalgo: min cannot be greater than max\n");
@@ -198,7 +219,7 @@ int main(int argc, char** argv) {
 		dijkstra_result_free(result);
 
 	} else {
-		fprintf(stderr, "graphalgo: not enough options passed\n");
+		fprintf(stderr, "graphalgo: unfamiliar combination of program options\n");
 		exit(EXIT_FAILURE);
 	}
 }

@@ -135,7 +135,7 @@ Graph* graph_read_from_stdin() {
 	}
 
 
-	if (rows <= 0 || cols <= 0) {
+	if (rows < 1 || cols < 1) {
 		fprintf(stderr, "graphalgo: invalid values of graph dimensions\n");
 		graph_free(graph);
 		exit(EXIT_FAILURE);
