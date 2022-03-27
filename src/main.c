@@ -75,7 +75,7 @@ static int is_help_selected(ProgArgs* a) {
 	return a->is_help  && (!is_other);
 }
 
-static void print_prog_help() {
+static void print_help() {
 	printf("graph generation:\n");
 	printf("graphalgo --generate --rows=<ROWS> --cols=<COLS> --min=<MIN> --max=<MAX> [--seed=<SEED>]\n");
 	printf("graphalgo -g -r<ROWS> -c<COLS> -n<MIN> -x<MAX> [-s<SEED>]\n");
@@ -172,7 +172,7 @@ int main(int argc, char** argv) {
 		prog_args.seed = time(NULL);
 
 	if (is_help_selected(&prog_args)) {
-		print_prog_help();
+		print_help();
 		exit(EXIT_SUCCESS);
 
 	} else if (is_gen_selected(&prog_args)) {
@@ -189,32 +189,40 @@ int main(int argc, char** argv) {
 		graph_free(graph);
 
 	} else if (is_bfs_selected(&prog_args)) {
-		Graph *graph = graph_read_from_stdin();
-		if (graph == NULL) {
+		Graph* graph = malloc(sizeof(*graph));
+		int did_fail = graph_read_from_stdin(graph);
+
+		if (did_fail) {
+			graph_free(graph);
 			fprintf(stderr, "graphalgo: invalid graph\n");
 			exit(EXIT_FAILURE);
-		} else if (prog_args.vert1 < 0 || prog_args.vert1 >= graph->cols * graph->rows) {
+		} 
+		if (prog_args.vert1 < 0 || prog_args.vert1 >= graph->cols * graph->rows) {
+			graph_free(graph);
 			fprintf(stderr, "graphalgo: invalid vertex index\n");
 			exit(EXIT_FAILURE);
 		}
+
 		BFSResult *result = bfs(graph, prog_args.vert1);
 		bfs_print_result(result);
 		bfs_result_free(result);
 		graph_free(graph);
 
 	} else if (is_dijkstra_selected(&prog_args)) {
-		Graph * graph = graph_read_from_stdin();
-		if(graph == NULL)
-		{
+		Graph * graph = malloc(sizeof(*graph));
+		int did_fail = graph_read_from_stdin(graph);
+
+		if(did_fail) {
+			graph_free(graph);
 			fprintf(stderr, "graphalgo: invalid graph\n");
 			exit(EXIT_FAILURE);
 		}
-		if(prog_args.vert1 >= graph->cols * graph->rows || prog_args.vert2 >= graph->cols * graph->rows)
-		{
+		if(prog_args.vert1 >= graph->cols * graph->rows || prog_args.vert2 >= graph->cols * graph->rows) {
 			graph_free(graph);
 			fprintf(stderr, "graphalgo: dijkstra: the specified verticies are not the part of the graph.\n");
 			exit(EXIT_FAILURE);
 		}
+
 		DijkstraResult * result = dijkstra(graph, prog_args.vert1);
 		dijkstra_print_result(result);
 		dijkstra_print_path(result, prog_args.vert2);
