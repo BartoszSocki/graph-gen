@@ -111,35 +111,24 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
     return graph;
 }
 
-Graph* graph_read_from_stdin() {
-	Graph *graph = malloc(sizeof(*graph));
+int graph_read_from_stdin(Graph* graph) {
 	if (graph == NULL)
-		return NULL;
+		return 1;
 
 	char *line = NULL;
 	/* ile bajtów bufora zaalokowano */
 	size_t line_size;
 
-	if (getline(&line, &line_size, stdin) < 1) {
-		fprintf(stderr, "graphalgo: unexpected EOF at first line\n");
-		graph_free(graph);
-		exit(EXIT_FAILURE);
-	}
+	if (getline(&line, &line_size, stdin) < 1)
+		return 1;
 
 	int rows, cols;
 	/* nie podano wszystkich wymiarów grafu */
-	if (sscanf(line, "%d %d", &rows, &cols) != 2) {
-		fprintf(stderr, "graphalgo: invalid number of graph dimensions\n");
-		graph_free(graph);
-		exit(EXIT_FAILURE);
-	}
+	if (sscanf(line, "%d %d", &rows, &cols) != 2)
+		return 1;
 
-
-	if (rows < 1 || cols < 1) {
-		fprintf(stderr, "graphalgo: invalid values of graph dimensions\n");
-		graph_free(graph);
-		exit(EXIT_FAILURE);
-	}
+	if (rows < 1 || cols < 1)
+		return 1;
 
 	graph->rows = rows;
 	graph->cols = cols;
@@ -150,11 +139,8 @@ Graph* graph_read_from_stdin() {
 	}
 
 	for (int i = 0; i < graph->rows * graph->cols; i++) {
-		if (getline(&line, &line_size, stdin) < 1) {
-			fprintf(stderr, "graphalgo: file incomplete\n");
-			graph_free(graph);
-			exit(EXIT_FAILURE);
-		}
+		if (getline(&line, &line_size, stdin) < 1)
+			return 1;
 
 		int index = 0;
 		int line_len = strlen(line);
@@ -165,28 +151,23 @@ Graph* graph_read_from_stdin() {
 			int assigned_values = sscanf(line + index, "%d : %lf %n", &end_vertex, &weight, &n);
 
 			/* niekompletny opis krawędzi */
-			if (assigned_values == 1) {
-				fprintf(stderr, "graphalgo: file incomplete\n");
-				graph_free(graph);
-				exit(EXIT_FAILURE);
-			}
+			if (assigned_values == 1) 
+				return 1;
 				
 			/* nie podano krawędzi */
 			if (assigned_values < 1)
 				break;
 
 			/* wierzchołek poza grafem */
-			if (graph_add_directed_edge(graph, i, end_vertex, weight) != 0) {
-				fprintf(stderr, "graphalgo: invalid vertex index\n");
-				graph_free(graph);
-				exit(EXIT_FAILURE);
-			}
+			if (graph_add_directed_edge(graph, i, end_vertex, weight) != 0)
+				return 1;
+
 			index += n;
 		}
 	}
 
 	free(line);
-	return graph;
+	return 0;
 }
 
 void graph_print_to_stdout(Graph *graph) {

@@ -22,7 +22,7 @@ void edge_free(Edge* edge);
 Graph* graph_generate_from_seed(int rows, int cols, double from, double to, long seed);
 
 /* zwraca błąd przy niepoprawnym formacie */
-Graph* graph_read_from_stdin();
+int graph_read_from_stdin(Graph* graph);
 void graph_print_to_stdout(Graph* graph);
 int graph_xy_to_index(Graph* graph, int row, int col);
 void graph_free(Graph* graph);
