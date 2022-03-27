@@ -53,3 +53,4 @@ rm out
 # =========================
 $graphalgo -g -r2 -c2 -n0 -x1 -s0 | sed '4,5s/.*//' > out
 cat out | $valgrind $graphalgo -b -1 0 > /dev/null
+rm out
