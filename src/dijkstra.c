@@ -80,6 +80,7 @@ void dijkstra_print_path(DijkstraResult * res, int to)
     if(res->pred[to] == -1)
     {
         printf("There is no path between %d and %d.\n", res->source, to);
+        return;
     }
 
 
