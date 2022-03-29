@@ -12,7 +12,7 @@ int main(int argc, char * argv[])
     for(int i = 99; i >0; i--)
     {
         if(result_of_dijsktra->pred[i] != i-1)
-            return 1;
+            return 0;
     }
 
     dijkstra_print_result(result_of_dijsktra);
@@ -20,5 +20,5 @@ int main(int argc, char * argv[])
     dijkstra_result_free(result_of_dijsktra);
     
     graph_free(graph);
-    return 0;
+    return 1; 
 }

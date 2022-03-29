@@ -1,4 +1,4 @@
-CFLAGS=-ggdb -Wall -pedantic --std=c99 -Wmisleading-indentation
+CFLAGS=-ggdb  -Wall -pedantic --std=c99 -Wmisleading-indentation
 .DEFAULT_GOAL := all
 
 objs/vertex_priority_queue.o: src/vertex_priority_queue.c src/vertex_priority_queue.h
@@ -28,10 +28,6 @@ graphalgo: src/main.c objs/bfs.o objs/graph.o objs/dijkstra.o objs/vertex_priori
 all:  graphalgo objs/vertex_priority_queue.o	
 
 test: graphalgo build_test_pq build_test_dijkstra 
-	@./bin/test_dijkstra 1>/dev/null && echo "Dijkstra : passed" || echo "Dijkstra: failed" 
-	@# PriorityQueue tests
-	@./bin/test_pq 1>/dev/null && echo "Vertex Priority Queue: passed" || echo "Vertex Priorty Queue: failed" 
-	@# Invalid Input tests
 	@bash ./tests/main_args_tests.sh
 	@bash ./tests/valgrind_tests.sh
 

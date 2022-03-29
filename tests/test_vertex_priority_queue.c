@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
     {
         QueuedVertex * min_vert = vertex_priority_queue_poll(pr);
         if(min_vert->index != no_vertex-1-i)
-            return 1;
+            return 0;
     }
 
     //clean up
@@ -48,5 +48,5 @@ int main(int argc, char * argv[])
     vertex_priority_queue_free(pr);
 
 
-    return 0;
+    return 1;
 }

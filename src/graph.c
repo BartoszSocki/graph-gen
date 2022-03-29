@@ -1,3 +1,4 @@
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,37 +27,37 @@ static int graph_add_directed_edge(Graph *graph, size_t beg_vertex, size_t end_v
 /* w kierunkach kardynalnych */
 /* do tego skierowane w dwie strony */
 static int graph_generate_bidirectional_edges_cardinal(Graph *graph, double min, double max) {
-    if (graph == NULL)
-        return 1;
+	if (graph == NULL)
+		return 1;
 
 	if (min > max)
 		return 1;
 
 	/* łączenie wierzchołków, "górny z dolnym" */
-    for (int i = 0; i < graph->rows - 1; i++) {
-        for (int j = 0; j < graph->cols; j++) {
-            double weight = uniform_random(min, max);
+	for (int i = 0; i < graph->rows - 1; i++) {
+		for (int j = 0; j < graph->cols; j++) {
+			double weight = uniform_random(min, max);
 			int res1 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i + 1, j), weight);
 			int res2 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i + 1, j), graph_xy_to_index(graph, i, j), weight);
 			if (res1 || res2) {
 				/* printf("index out of bounds\n"); */
 				return 1;
 			}
-        }
-    }
+		}
+	}
 
 	/* łączenie wierzchołków, "lewy z prawym" */
-    for (int i = 0; i < graph->rows; i++) {
-        for (int j = 0; j < graph->cols - 1; j++) {
-            double weight = uniform_random(min, max);
+	for (int i = 0; i < graph->rows; i++) {
+		for (int j = 0; j < graph->cols - 1; j++) {
+			double weight = uniform_random(min, max);
 			int res1 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j), graph_xy_to_index(graph, i, j + 1), weight);
 			int res2 = graph_add_directed_edge(graph, graph_xy_to_index(graph, i, j + 1), graph_xy_to_index(graph, i, j), weight);
 			if (res1 || res2) {
 				/* printf("index out of bounds\n"); */
 				return 1;
 			}
-        }
-    }
+		}
+	}
 	return 0;
 }
 
@@ -66,9 +67,9 @@ int graph_xy_to_index(Graph* graph, int row, int col) {
 }
 
 Edge* edge_init(int end_vertex, double weight, Edge *next) {
-    Edge* edge = malloc(sizeof(*edge));
-    if (edge == NULL)
-        return NULL;
+	Edge* edge = malloc(sizeof(*edge));
+	if (edge == NULL)
+		return NULL;
 
 	edge->end_vertex = end_vertex;
 	edge->weight = weight;
@@ -80,12 +81,12 @@ Edge* edge_init(int end_vertex, double weight, Edge *next) {
 Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long seed) {
 	Graph* graph = malloc(sizeof(*graph));
 
-    if (graph == NULL)
-        return NULL;
+	if (graph == NULL)
+		return NULL;
 
-    graph->edges = calloc(rows * cols, sizeof(*graph->edges));
-    if (graph->edges == NULL)
-        return NULL;
+	graph->edges = calloc(rows * cols, sizeof(*graph->edges));
+	if (graph->edges == NULL)
+		return NULL;
 
 	if (rows <= 0 || cols <= 0) {
 		graph_free(graph);
@@ -97,10 +98,10 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
 		return NULL;
 	}
 
-    graph->rows = rows;
-    graph->cols = cols;
+	graph->rows = rows;
+	graph->cols = cols;
 
-    srand(seed);
+	srand(seed);
 	int res = graph_generate_bidirectional_edges_cardinal(graph, min, max);
 	if (res) {
 		/* puts("error occured during generation of graph edges"); */
@@ -108,7 +109,7 @@ Graph* graph_generate_from_seed(int rows, int cols, double min, double max, long
 		return NULL;
 	}
 
-    return graph;
+	return graph;
 }
 
 int graph_read_from_stdin(Graph* graph) {
@@ -132,10 +133,10 @@ int graph_read_from_stdin(Graph* graph) {
 
 	graph->rows = rows;
 	graph->cols = cols;
-    graph->edges = calloc(graph->rows * graph->cols, sizeof(*graph->edges));
-    if (graph->edges == NULL) {
+	graph->edges = calloc(graph->rows * graph->cols, sizeof(*graph->edges));
+	if (graph->edges == NULL) {
 		graph_free(graph);
-        return NULL;
+		return 1;
 	}
 
 	for (int i = 0; i < graph->rows * graph->cols; i++) {
@@ -153,7 +154,7 @@ int graph_read_from_stdin(Graph* graph) {
 			/* niekompletny opis krawędzi */
 			if (assigned_values == 1) 
 				return 1;
-				
+
 			/* nie podano krawędzi */
 			if (assigned_values < 1)
 				break;
@@ -171,23 +172,23 @@ int graph_read_from_stdin(Graph* graph) {
 }
 
 void graph_print_to_stdout(Graph *graph) {
-    if (graph == NULL) {
-        puts("(null)");
-        return;
-    }
+	if (graph == NULL) {
+		puts("(null)");
+		return;
+	}
 
-    printf("%zu %zu\n", graph->rows, graph->cols);
-    for (int i = 0; i < graph->rows; i++) {
-        for (int j = 0; j < graph->cols; j++) {
-            Edge* dummy = graph->edges[graph_xy_to_index(graph, i, j)];
+	printf("%zu %zu\n", graph->rows, graph->cols);
+	for (int i = 0; i < graph->rows; i++) {
+		for (int j = 0; j < graph->cols; j++) {
+			Edge* dummy = graph->edges[graph_xy_to_index(graph, i, j)];
 			printf("\t");
-            while (dummy) {
-                printf("%u :%lf  ", dummy->end_vertex, dummy->weight);
-                dummy = dummy->next;
-            }
-            printf("\n");
-        }
-    }
+			while (dummy) {
+				printf("%u :%lf  ", dummy->end_vertex, dummy->weight);
+				dummy = dummy->next;
+			}
+			printf("\n");
+		}
+	}
 }
 
 void edge_free(Edge* edge) {

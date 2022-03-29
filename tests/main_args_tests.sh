@@ -24,6 +24,13 @@ assert_fail() {
 	fi
 	index=$((index + 1))
 }
+# =========================
+./bin/test_dijkstra 1>/dev/null 
+assert_fail Dijkstra  
+
+# =========================
+./bin/test_pq 1>/dev/null 
+assert_fail VertexPriorityQueue  
 
 # =========================
 $graphalgo -g 2> /dev/null
@@ -91,3 +98,5 @@ assert_success "directed graph from stdin 1"
 # =========================
 $graphalgo -g -r2 -c2 -n0 -x1 -s0 | sed '4,5s/.*//' | $graphalgo -b -1 0 > /dev/null
 assert_success "directed graph from stdin 2"
+
+
