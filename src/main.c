@@ -51,7 +51,7 @@ static struct option long_options[] = {
 	{0, 0, 0, 0}
 };
 
-PROG_OPTION char_to_prog_options(int ch) {
+PROG_OPTION char_to_prog_option(int ch) {
 	switch (ch) {
 		case 'h': return IS_HELP;
 		case 'g': return IS_GEN;
@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
 	int vert1, vert2;
 
 	while ((opt = getopt_long(argc, argv, ":hbdgs:r:c:n:x:b:1:2:", long_options, &long_index)) != -1) {
-		PROG_OPTION curr_option = char_to_prog_options(opt);
+		PROG_OPTION curr_option = char_to_prog_option(opt);
 
 		/* sprawdź czy już była wcześniej zaznaczona */
 		if ((prog_options & curr_option) != 0)
