@@ -117,7 +117,7 @@ int main(int argc, char** argv) {
 			case 'd':
 				break;
 			default:
-				PROGRAM_ERROR("cannot find option")
+				PROGRAM_ERROR("cannot find an option, for help run: graphalgo --help")
 				break;
 		}
 	}
@@ -187,6 +187,6 @@ int main(int argc, char** argv) {
 		graph_free(graph);
 
 	} else {
-		PROGRAM_ERROR("unfamiliar combination of program options");
+		PROGRAM_ERROR("unfamiliar combination of program options, for help run: graphalgo --help");
 	}
 }
