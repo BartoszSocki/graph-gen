@@ -7,11 +7,13 @@
 void bfs_print_result(BFSResult *result) {
 	if (result == NULL) {
 		puts("(null)");
+		return;
 	}
 
+	puts("Vertex\tDistance");
 	for (int i = 0; i < result->size; i++) {
 		if (result->visited[i])
-			printf("%d %lf\n", result->verticies[i], result->weights[i]);
+			printf("%d\t%lf\n", result->verticies[i], result->weights[i]);
 	}
 }
 
@@ -33,19 +35,14 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 	result->size = graph_size;
 
 	if (result->verticies == NULL || result->weights == NULL || result->visited == NULL) {
-		free(result->verticies);
-		free(result->weights);
-		free(result->visited);
-		free(result);
+		bfs_result_free(result);
 		return NULL;
 	}
 
-	/* dirty queue implementation, because size = const */
 	int beg_index = 0;
 	int end_index = 1;
 
 	result->verticies[0] = start_vertex;
-	result->weights[0] = 0;
 	result->visited[start_vertex] = true;
 
 	while (beg_index < end_index) {
@@ -53,8 +50,9 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 		Edge* edges = graph->edges[curr_vertex];
 		while (edges != NULL) {
 			if (!result->visited[edges->end_vertex]) {
+				/* dodaj do kolejki */
 				result->verticies[end_index] = edges->end_vertex;
-				result->weights[end_index] = result->weights[curr_vertex] + 1;
+				result->weights[end_index] = result->weights[beg_index - 1] + 1;
 				end_index++;
 				result->visited[edges->end_vertex] = true;
 			}
@@ -71,4 +69,4 @@ void bfs_result_free(BFSResult* result) {
 	free(result->weights);
 	free(result->verticies);
 	free(result);
-}
+ }
