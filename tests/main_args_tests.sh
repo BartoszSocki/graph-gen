@@ -34,21 +34,21 @@ assert_fail VertexPriorityQueue
 
 # =========================
 ./bin/test_bfs 1> /dev/null
-assert_success bfs tests
+assert_success "bfs tests"
 
 # =========================
 $graphalgo -g 2> /dev/null
-assert_fail missing flags 
+assert_fail "missing flags"
 
 # =========================
 $graphalgo -g -g 2> /dev/null
-assert_fail 2x the same flag
+assert_fail "2x the same flag"
 
 # =========================
 $graphalgo -g -r4 -c4 -n0 -x1 -s0 > out1
 $graphalgo --generate --rows=4 --cols=4 --min=0 --max=1 --seed=0 > out2
 diff out1 out2
-assert_success
+assert_success "2x the same but one with short options, second with long"
 rm out1 out2
 
 # =========================
