@@ -30,7 +30,7 @@ graphalgo: src/main.c objs/bfs.o objs/graph.o objs/dijkstra.o objs/vertex_priori
 
 all:  graphalgo objs/vertex_priority_queue.o	
 
-test: graphalgo build_test_pq build_test_dijkstra 
+test: graphalgo build_test_pq build_test_dijkstra build_test_bfs
 	@bash ./tests/main_args_tests.sh
 	@bash ./tests/valgrind_tests.sh
 
