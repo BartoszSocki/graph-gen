@@ -67,10 +67,11 @@ void dijkstra_result_free(DijkstraResult * result)
 
 void dijkstra_print_result(DijkstraResult * res)
 {
-    printf("Vertex\tDistance\tPredecessor\n");
     for(int i =0; i < res->no_verticies; i++ )
     {
-        printf("%d\t%g\t\t%d\n", i, res->dist[i], res->pred[i]);
+        printf("Vertex %d\n", i);
+        printf("\tDistance from %d: %d\n", res->source, res->pred[i] );
+        printf("\tPredecessor: %d\n", res->pred[i] );
     }
 }
 
