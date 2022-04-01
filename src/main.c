@@ -7,73 +7,7 @@
 #include "bfs.h"
 #include "dijkstra.h"
 
-typedef struct {
-	int is_help;
-	int is_gen;
-	int is_seed;
-	int is_rows;
-	int is_cols;
-	int is_min;
-	int is_max;
-	int is_bfs;
-	int is_dijkstra;
-	int is_vert1;
-	int is_vert2;
-
-	long seed;
-	int rows;
-	int cols;
-	double min;
-	double max;
-	int vert1;
-	int vert2;
-} ProgArgs;
-
-static struct option long_options[] = {
-	{"help"		, optional_argument, 0, 'h'},
-	{"generate"	, optional_argument, 0, 'g'},
-	{"rows"		, optional_argument, 0, 'r'},
-	{"cols"		, optional_argument, 0, 'c'},
-	{"min"		, optional_argument, 0, 'n'},
-	{"max"		, optional_argument, 0, 'x'},
-	{"seed"		, optional_argument, 0, 's'},
-	{"bfs"		, optional_argument, 0, 'b'},
-	{"dijkstra"	, optional_argument, 0, 'd'},
-	{"vert1"	, optional_argument, 0, '1'},
-	{"vert2"	, optional_argument, 0, '2'},
-	{0, 0, 0, 0}
-};
-
-static int is_gen_selected(ProgArgs* a) {
-	if (a == NULL)
-		return 0;
-	int is_gen = a->is_gen && a->is_rows && a->is_cols && a->is_min && a->is_max;
-	int is_other = a->is_bfs || a->is_dijkstra || a->is_vert1 || a->is_vert2;
-	return is_gen && (!is_other);
-}
-
-static int is_bfs_selected(ProgArgs* a) {
-	if (a == NULL)
-		return 0;
-	int is_bfs = a->is_bfs && a->is_vert1;
-	int is_other = a->is_gen || a->is_rows || a->is_cols || a->is_min || a->is_max || a->is_dijkstra || a->is_vert2 || a->is_seed;
-	return is_bfs && (!is_other);
-}
-
-static int is_dijkstra_selected(ProgArgs* a) {
-	if (a == NULL)
-		return 0;
-	int is_dijkstra = a->is_dijkstra && a->is_vert1 && a->is_vert2;
-	int is_other = a->is_gen || a->is_rows || a->is_cols || a->is_min || a->is_max || a->is_bfs || a->is_seed;
-	return is_dijkstra && (!is_other);
-}
-
-static int is_help_selected(ProgArgs* a) {
-	if (a == NULL)
-		return 0;
-	int is_other = a->is_gen || a->is_rows || a->is_cols || a->is_min || a->is_max || a->is_bfs || a->is_dijkstra || a->is_seed || a->is_vert1 || a->is_vert2;
-	return a->is_help  && (!is_other);
-}
+#define PROGRAM_ERROR(message) { fprintf(stderr, "%s: %s\n", argv[0], message); exit(EXIT_FAILURE); }
 
 static void print_help() {
 	printf("graph generation:\n");
@@ -87,128 +21,153 @@ static void print_help() {
 	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
 
-static void error_many_options(char* option_name) {
-	fprintf(stderr, "graphalgo: %s passed multiple times\n", option_name);
-	exit(EXIT_FAILURE);
+/* maski bitowe opcji */
+typedef enum {
+	INVALID = 0,
+	IS_HELP = 1,
+	IS_GEN = 1 << 1,
+	IS_ROWS = 1 << 2,
+	IS_COLS = 1 << 3,
+	IS_MIN = 1 << 4,
+	IS_MAX = 1 << 5,
+	IS_SEED = 1 << 6,
+	IS_BFS = 1 << 7,
+	IS_DIJKSTRA = 1 << 8,
+	IS_VERT1 = 1 << 9,
+	IS_VERT2 = 1 << 10
+} PROG_OPTION;
+
+static struct option long_options[] = {
+	{"help"		, no_argument, 0, 'h'},
+	{"generate"	, no_argument, 0, 'g'},
+	{"rows"		, required_argument, 0, 'r'},
+	{"cols"		, required_argument, 0, 'c'},
+	{"min"		, required_argument, 0, 'n'},
+	{"max"		, required_argument, 0, 'x'},
+	{"seed"		, required_argument, 0, 's'},
+	{"bfs"		, no_argument, 0, 'b'},
+	{"dijkstra"	, no_argument, 0, 'd'},
+	{"vert1"	, required_argument, 0, '1'},
+	{"vert2"	, required_argument, 0, '2'},
+	{0, 0, 0, 0}
+};
+
+/* mapowanie: wartość z long_option -> maska bitowa opcji */
+PROG_OPTION char_to_prog_option(int ch) {
+	switch (ch) {
+		case 'h': return IS_HELP;
+		case 'g': return IS_GEN;
+		case 'r': return IS_ROWS;
+		case 'c': return IS_COLS;
+		case 'n': return IS_MIN;
+		case 'x': return IS_MAX;
+		case 's': return IS_SEED;
+		case 'b': return IS_BFS;
+		case 'd': return IS_DIJKSTRA;
+		case '1': return IS_VERT1;
+		case '2': return IS_VERT2;
+		default:  return INVALID;
+	}
 }
 
 int main(int argc, char** argv) {
 	int opt, long_index = 0;
-	ProgArgs prog_args = {0};
+	int prog_options = 0;
+
+	long seed;
+	int rows, cols;
+	double min, max;
+	int vert1, vert2;
 
 	while ((opt = getopt_long(argc, argv, ":hbdgs:r:c:n:x:b:1:2:", long_options, &long_index)) != -1) {
+		PROG_OPTION curr_option = char_to_prog_option(opt);
+
+		/* sprawdź czy już była wcześniej zaznaczona */
+		if ((prog_options & curr_option) != 0)
+			PROGRAM_ERROR("duplicated option")
+
+		/* dodanie opcji */
+		prog_options |= curr_option;
+
 		switch (opt) {
-			case 'h':
-				if (prog_args.is_help == 1)
-					error_many_options("-h, --help");
-				prog_args.is_help = 1;
-				break;
-			case 'g':
-				if (prog_args.is_gen == 1)
-					error_many_options("-g, --generate");
-				prog_args.is_gen = 1;
-				break;
 			case 's':
-				if (prog_args.is_seed == 1)
-					error_many_options("-s, --seed");
-				prog_args.is_seed = 1;
-				prog_args.seed = atol(optarg);
+				seed = atol(optarg);
 				break;
 			case 'r':
-				if (prog_args.is_rows == 1)
-					error_many_options("-r, --rows");
-				prog_args.is_rows = 1;
-				prog_args.rows = atoi(optarg);
+				rows = atoi(optarg);
 				break;
 			case 'c':
-				if (prog_args.is_cols == 1)
-					error_many_options("-c, --cols");
-				prog_args.is_cols = 1;
-				prog_args.cols = atoi(optarg);
+				cols = atoi(optarg);
 				break;
 			case 'n':
-				if (prog_args.is_min == 1)
-					error_many_options("-n, --min");
-				prog_args.is_min = 1;
-				prog_args.min = atof(optarg);
+				min = atof(optarg);
 				break;
 			case 'x':
-				if (prog_args.is_max == 1)
-					error_many_options("-x, --max");
-				prog_args.is_max = 1;
-				prog_args.max = atof(optarg);
-				break;
-			case 'b':
-				if (prog_args.is_bfs == 1)
-					error_many_options("-b, --bfs");
-				prog_args.is_bfs = 1;
-				break;
-			case 'd':
-				if (prog_args.is_dijkstra == 1)
-					error_many_options("-d, --dijkstra");
-				prog_args.is_dijkstra = 1;
+				max = atof(optarg);
 				break;
 			case '1':
-				if (prog_args.is_vert1 == 1)
-					error_many_options("-1, --vert1");
-				prog_args.is_vert1 = 1;
-				prog_args.vert1 = atoi(optarg);
+				vert1 = atoi(optarg);
 				break;
 			case '2':
-				if (prog_args.is_vert2 == 1)
-					error_many_options("-2, --vert2");
-				prog_args.is_vert2 = 1;
-				prog_args.vert2 = atoi(optarg);
+				vert2 = atoi(optarg);
+				break;
+			case 'h':
+			case 'g':
+			case 'b':
+			case 'd':
 				break;
 			default:
-				fprintf(stderr, "graphalgo: invalid flag\n");
-				exit(EXIT_FAILURE);
+				PROGRAM_ERROR("cannot find an option, for help run: graphalgo --help")
 				break;
 		}
 	}
 
-	/* nie podano ziarna dla generatora */
-	if (prog_args.is_seed == 0)
-		prog_args.seed = time(NULL);
+	/* wszystkie kombinacje opcji obsługiwane przez program */
+	const int SEED = IS_SEED;
+	const int HELP = IS_HELP;
+	const int GEN = IS_GEN | IS_ROWS | IS_COLS | IS_MIN | IS_MAX;
+	const int GEN_SEED = GEN | SEED;
+	const int BFS = IS_BFS | IS_VERT1;
+	const int DIJKSTRA = IS_DIJKSTRA | IS_VERT1 | IS_VERT2;
 
-	if (is_help_selected(&prog_args)) {
+	/* nie podano ziarna dla generatora */
+	if ((prog_options ^ SEED) == 0)
+		seed = time(NULL);
+
+	if ((prog_options ^ HELP) == 0) {
 		print_help();
 		exit(EXIT_SUCCESS);
 
-	} else if (is_gen_selected(&prog_args)) {
-		if (prog_args.rows < 1 || prog_args.cols < 1) {
-			fprintf(stderr, "graphalgo: rows and cols cannot be smaller than 1\n");
-			exit(EXIT_FAILURE);
-		} else if (prog_args.min > prog_args.max) {
-			fprintf(stderr, "graphalgo: min cannot be greater than max\n");
-			exit(EXIT_FAILURE);
+	} else if ((prog_options ^ GEN) == 0 || (prog_options ^ GEN_SEED) == 0) {
+		if (rows < 1 || cols < 1) {
+			PROGRAM_ERROR("rows and cols cannot be smaller than 1"); 
+		} else if (min > max) {
+			PROGRAM_ERROR("min cannot be greater than max");
 		}
 
-		Graph *graph = graph_generate_from_seed(prog_args.rows, prog_args.cols, prog_args.min, prog_args.max, prog_args.seed);
+		Graph *graph = graph_generate_from_seed(rows, cols, min, max, seed);
 		graph_print_to_stdout(graph);
 		graph_free(graph);
 
-	} else if (is_bfs_selected(&prog_args)) {
+	} else if ((prog_options ^ BFS) == 0) {
 		Graph* graph = malloc(sizeof(*graph));
 		int did_fail = graph_read_from_stdin(graph);
 
 		if (did_fail) {
 			graph_free(graph);
-			fprintf(stderr, "graphalgo: invalid graph\n");
-			exit(EXIT_FAILURE);
+			PROGRAM_ERROR("invalid graph");
 		} 
-		if (prog_args.vert1 < 0 || prog_args.vert1 >= graph->cols * graph->rows) {
+		if (vert1 < 0 || vert1 >= graph->cols * graph->rows) {
 			graph_free(graph);
-			fprintf(stderr, "graphalgo: invalid vertex index\n");
-			exit(EXIT_FAILURE);
+			PROGRAM_ERROR("invalid vertex index");
 		}
 
-		BFSResult *result = bfs(graph, prog_args.vert1);
+		BFSResult *result = bfs(graph, vert1);
 		bfs_print_result(result);
 		bfs_result_free(result);
 		graph_free(graph);
 
-	} else if (is_dijkstra_selected(&prog_args)) {
+	} else if ((prog_options ^ DIJKSTRA) == 0) {
 		Graph * graph = malloc(sizeof(*graph));
 		int did_fail = graph_read_from_stdin(graph);
 		
@@ -216,23 +175,20 @@ int main(int argc, char** argv) {
 
 		if(did_fail) {
 			graph_free(graph);
-			fprintf(stderr, "graphalgo: invalid graph\n");
-			exit(EXIT_FAILURE);
+			PROGRAM_ERROR("invalid graph");
 		}
-		if(prog_args.vert1 >= graph->cols * graph->rows || prog_args.vert2 >= graph->cols * graph->rows) {
+		if(vert1 >= graph->cols * graph->rows || vert2 >= graph->cols * graph->rows) {
 			graph_free(graph);
-			fprintf(stderr, "graphalgo: dijkstra: the specified verticies are not the part of the graph.\n");
-			exit(EXIT_FAILURE);
+			PROGRAM_ERROR("dijkstra: the specified verticies are not the part of the graph");
 		}
 
-		DijkstraResult * result = dijkstra(graph, prog_args.vert1);
+		DijkstraResult * result = dijkstra(graph, vert1);
 		dijkstra_print_result(result);
-		dijkstra_print_path(result, prog_args.vert2);
+		dijkstra_print_path(result, vert2);
 		dijkstra_result_free(result);
 		graph_free(graph);
 
 	} else {
-		fprintf(stderr, "graphalgo: unfamiliar combination of program options\n");
-		exit(EXIT_FAILURE);
+		PROGRAM_ERROR("unfamiliar combination of program options, for help run: graphalgo --help");
 	}
 }
