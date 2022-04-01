@@ -21,6 +21,7 @@ static void print_help() {
 	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
 
+/* maski bitowe opcji */
 typedef enum {
 	INVALID = 0,
 	IS_HELP = 1,
@@ -51,6 +52,7 @@ static struct option long_options[] = {
 	{0, 0, 0, 0}
 };
 
+/* mapowanie: wartość z long_option -> maska bitowa opcji */
 PROG_OPTION char_to_prog_option(int ch) {
 	switch (ch) {
 		case 'h': return IS_HELP;
@@ -84,6 +86,7 @@ int main(int argc, char** argv) {
 		if ((prog_options & curr_option) != 0)
 			PROGRAM_ERROR("duplicated option")
 
+		/* dodanie opcji */
 		prog_options |= curr_option;
 
 		switch (opt) {
@@ -119,6 +122,7 @@ int main(int argc, char** argv) {
 		}
 	}
 
+	/* wszystkie kombinacje opcji obsługiwane przez program */
 	const int SEED = IS_SEED;
 	const int HELP = IS_HELP;
 	const int GEN = IS_GEN | IS_ROWS | IS_COLS | IS_MIN | IS_MAX;
