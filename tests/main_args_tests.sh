@@ -33,6 +33,10 @@ assert_fail Dijkstra
 assert_fail VertexPriorityQueue  
 
 # =========================
+./bin/test_bfs 1> /dev/null
+assert_success bfs tests
+
+# =========================
 $graphalgo -g 2> /dev/null
 assert_fail missing flags 
 
