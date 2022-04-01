@@ -8,7 +8,7 @@
 typedef struct {
 	bool *visited;
 	int *verticies;
-	double *weights;
+double *distance;
 
 	size_t size;
 } BFSResult;
