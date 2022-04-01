@@ -12,8 +12,9 @@ void bfs_print_result(BFSResult *result) {
 
 	puts("Vertex\tDistance");
 	for (int i = 0; i < result->size; i++) {
+		/* tylko jeżeli istnieje */
 		if (result->visited[i])
-			printf("%d\t%lf\n", result->verticies[i], result->weights[i]);
+			printf("%d\t%lf\n", result->verticies[i], result->distance[i]);
 	}
 }
 
@@ -31,28 +32,33 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 
 	result->visited = calloc(graph_size, sizeof(*(result->visited)));
 	result->verticies = calloc(graph_size, sizeof(*(result->verticies)));
-	result->weights = calloc(graph_size, sizeof(*(result->weights)));
+	result->distance = calloc(graph_size, sizeof(*(result->distance)));
 	result->size = graph_size;
 
-	if (result->verticies == NULL || result->weights == NULL || result->visited == NULL) {
+	if (result->verticies == NULL || result->distance == NULL || result->visited == NULL) {
 		bfs_result_free(result);
 		return NULL;
 	}
 
+	/* kolejka jest zaimplementowana, poprzez tablice o stałej wielkości i dwa wskaźniki, */
+	/* ponieważ ilość elementów jest stała i znana */
 	int beg_index = 0;
 	int end_index = 1;
 
+	/* dodanie pierwszego wierzchołka do kolejki */
 	result->verticies[0] = start_vertex;
 	result->visited[start_vertex] = true;
 
 	while (beg_index < end_index) {
 		int curr_vertex = result->verticies[beg_index++];
 		Edge* edges = graph->edges[curr_vertex];
+		/* dla wszystkich sąsiadów */
 		while (edges != NULL) {
 			if (!result->visited[edges->end_vertex]) {
-				/* dodaj do kolejki */
+				/* dodaj nieodwiedzony wierzchołek do kolejki */
 				result->verticies[end_index] = edges->end_vertex;
-				result->weights[end_index] = result->weights[beg_index - 1] + 1;
+				/* dystans dla tego wierzchołka, to dystans jego poprzednika + 1 */
+				result->distance[end_index] = result->distance[beg_index - 1] + 1;
 				end_index++;
 				result->visited[edges->end_vertex] = true;
 			}
@@ -66,7 +72,7 @@ void bfs_result_free(BFSResult* result) {
 	if (result == NULL)
 		return;
 	free(result->visited);
-	free(result->weights);
+	free(result->distance);
 	free(result->verticies);
 	free(result);
  }
