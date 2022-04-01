@@ -22,6 +22,9 @@ graphalgo: src/main.c objs/graph.o objs/bfs.o
 build_test_dijkstra: objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o
 	cc $(CFLAGS) tests/test_dijkstra.c objs/dijkstra.o objs/vertex_priority_queue.o objs/graph.o -Isrc/ -o bin/test_dijkstra 
 
+build_test_bfs: objs/bfs.o objs/graph.o
+	cc $(CFLAGS) tests/test_bfs.c objs/bfs.o objs/graph.o -Isrc/ -o bin/test_bfs
+
 graphalgo: src/main.c objs/bfs.o objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o
 	cc $(CFLAGS) src/main.c objs/bfs.o objs/graph.o objs/dijkstra.o objs/vertex_priority_queue.o -o bin/graphalgo
 
