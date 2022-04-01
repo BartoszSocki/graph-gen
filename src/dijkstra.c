@@ -67,6 +67,7 @@ void dijkstra_result_free(DijkstraResult * result)
 
 void dijkstra_print_result(DijkstraResult * res)
 {
+    printf("Result of dijkstra:\n");
     for(int i =0; i < res->no_verticies; i++ )
     {
         printf("Vertex %d\n", i);
