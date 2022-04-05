@@ -71,7 +71,7 @@ void dijkstra_print_result(DijkstraResult * res)
     for(int i =0; i < res->no_verticies; i++ )
     {
         printf("Vertex %d\n", i);
-        printf("\tDistance from %d: %d\n", res->source, res->pred[i] );
+        printf("\tDistance from %d: %g\n", res->source, res->dist[i] );
         printf("\tPredecessor: %d\n", res->pred[i] );
     }
 }
@@ -115,6 +115,8 @@ void dijkstra_print_path(DijkstraResult * res, int to)
     {
         printf("%d\t->\t%d\n", path[i+1], path[i]);
     }
+
+    printf("Cost of the path: %g\n", res->dist[to]);
 
 
     free(path);
