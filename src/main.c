@@ -13,10 +13,12 @@ static void print_help() {
 	printf("graph generation:\n");
 	printf("graphalgo --generate --rows=<ROWS> --cols=<COLS> --min=<MIN> --max=<MAX> [--seed=<SEED>]\n");
 	printf("graphalgo -g -r<ROWS> -c<COLS> -n<MIN> -x<MAX> [-s<SEED>]\n");
-	printf("bfs:\n");
+	printf("\nbfs:\n");
+	printf("Graph on which the algorithm will be run is passed via stdin.\n");
 	printf("graphalgo --bfs --vert1=<VERT1>\n");
 	printf("graphalgo -b -1<VERT1>\n");
-	printf("dijkstra:\n");
+	printf("\ndijkstra:\n");
+	printf("Graph on which the algorithm will be run is passed via stdin.\n");
 	printf("graphalgo --dijkstra --vert1=<VERT1> --vert2=<VERT2>\n");
 	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
@@ -170,7 +172,6 @@ int main(int argc, char** argv) {
 	} else if ((prog_options ^ DIJKSTRA) == 0) {
 		Graph * graph = malloc(sizeof(*graph));
 		int did_fail = graph_read_from_stdin(graph);
-		
 		if(did_fail) {
 			graph_free(graph);
 			PROGRAM_ERROR("invalid graph");
@@ -181,7 +182,6 @@ int main(int argc, char** argv) {
 		}
 
 		DijkstraResult * result = dijkstra(graph, vert1);
-		dijkstra_print_result(result);
 		dijkstra_print_path(result, vert2);
 		dijkstra_result_free(result);
 		graph_free(graph);
