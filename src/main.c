@@ -171,8 +171,6 @@ int main(int argc, char** argv) {
 		Graph * graph = malloc(sizeof(*graph));
 		int did_fail = graph_read_from_stdin(graph);
 		
-		graph_print_to_stdout(graph);
-
 		if(did_fail) {
 			graph_free(graph);
 			PROGRAM_ERROR("invalid graph");
