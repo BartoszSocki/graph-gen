@@ -3,8 +3,8 @@
 
 #include <stdlib.h>
 
-typedef struct Edge_t {
-	struct Edge_t* next;
+typedef struct Edge {
+	struct Edge* next;
 	int end_vertex;
 	double weight;
 } Edge;
