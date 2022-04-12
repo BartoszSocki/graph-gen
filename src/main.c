@@ -23,7 +23,7 @@ static void print_help() {
 	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
 
-static int validate_number_input(char * in)
+static int validate_double_input(char * in)
 {
 	//indicates wheather '.' has been already used
 	int dot_used=0; 
@@ -43,6 +43,22 @@ static int validate_number_input(char * in)
 			else{
 				return 0;
 			}
+		}	
+		in++;
+	}
+
+	return 1;
+}
+
+static int validate_long_input(char * in)
+{
+	//iterate through text
+	while(*in != '\0')
+	{
+		//check if its in range 0-9
+		if(!(*in >= '0' && *in <='9'))
+		{
+			return 0;
 		}	
 		in++;
 	}
@@ -121,46 +137,46 @@ int main(int argc, char** argv) {
 
 		switch (opt) {
 			case 's':
-				if(validate_number_input(optarg))
+				if(validate_long_input(optarg))
 					seed = atol(optarg);
 				else
 					PROGRAM_ERROR("invalid seed");
 				break;
 			case 'r':
-				if(validate_number_input(optarg))
+				if(validate_long_input(optarg))
 					rows = atoi(optarg);
 				else
 					PROGRAM_ERROR("invalid number of rows");
 				break;
 			case 'c':
-				if(validate_number_input(optarg))
+				if(validate_long_input(optarg))
 					cols = atoi(optarg);
 				else
 					PROGRAM_ERROR("invalid number of columns");
 				break;
 			case 'n':
-				if(validate_number_input(optarg))
+				if(validate_double_input(optarg))
 					min = atof(optarg);
 				else
 					PROGRAM_ERROR("invalid min value of weights");
 				break;
 			case 'x':
-				if(validate_number_input(optarg))
+				if(validate_double_input(optarg))
 					max = atof(optarg);
 				else
 					PROGRAM_ERROR("invalid max value of weights");
 				break;
 			case '1':
-				if(validate_number_input(optarg))
+				if(validate_long_input(optarg))
 					vert1 = atoi(optarg);
 				else
-					PROGRAM_ERROR("invalid vertex 1 index");
+					PROGRAM_ERROR("invalid index of vertex1");
 				break;
 			case '2':
-				if(validate_number_input(optarg))
+				if(validate_long_input(optarg))
 					vert2 = atoi(optarg);
 				else
-					PROGRAM_ERROR("invalid vertex 2 index");
+					PROGRAM_ERROR("invalid index of vertex2");
 				break;
 			case 'h':
 			case 'g':
