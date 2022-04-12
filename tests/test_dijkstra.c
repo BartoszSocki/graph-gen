@@ -16,7 +16,7 @@ int main(int argc, char * argv[])
     }
 
     dijkstra_print_result(result_of_dijsktra);
-    dijkstra_print_path(result_of_dijsktra, 99);
+    dijkstra_print_path(result_of_dijsktra, graph, 99);
     dijkstra_result_free(result_of_dijsktra);
     
     graph_free(graph);

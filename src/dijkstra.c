@@ -76,9 +76,29 @@ void dijkstra_print_result(DijkstraResult * res)
     }
 }
 
-void dijkstra_print_path(DijkstraResult * res, int to)
+void dijkstra_print_path(DijkstraResult * res, Graph * graph, int to)
 {
+    
+    //check if the source and destination are the same
+    if(res->source == to)
+    {
+        //check if there is loop
+        Edge * e = graph->edges[res->source];
+        while(e != NULL)
+        {
+            if(e->end_vertex == res->source)
+            {
+                printf("There is loop on %d vertex with the cost of %g.\n", res->source, e->weight);
+                return;
+            }
+            e = e->next;
+        }
 
+        printf("The destination and source vertex are the same there is no self-loop.\n");
+        return;
+    }
+
+    //check if there is path
     if(res->pred[to] == -1)
     {
         printf("There is no path between %d and %d.\n", res->source, to);
@@ -97,7 +117,6 @@ void dijkstra_print_path(DijkstraResult * res, int to)
 
     while(path[i] != -1)
     {
-
         i = i+1; 
         //get previous vertex of the last inserted element in the path 
         path[i] = res->pred[path[i-1]];
