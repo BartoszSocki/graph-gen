@@ -23,6 +23,33 @@ static void print_help() {
 	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
 
+static int validate_number_input(char * in)
+{
+	//indicates wheather '.' has been already used
+	int dot_used=0; 
+
+	//iterate through text
+	while(*in != '\0')
+	{
+		//check if its in range 0-9
+		if(!(*in >= '0' && *in <='9'))
+		{
+			if(*in == '.'){
+				dot_used++;
+				//if there are two dots the input is invalid
+				if(dot_used == 2)
+					return 0;
+			}
+			else{
+				return 0;
+			}
+		}	
+		in++;
+	}
+
+	return 1;
+}
+
 /* maski bitowe opcji */
 typedef enum {
 	INVALID = 0,
@@ -81,6 +108,7 @@ int main(int argc, char** argv) {
 	double min, max;
 	int vert1, vert2;
 
+
 	while ((opt = getopt_long(argc, argv, ":hbdgs:r:c:n:x:b:1:2:", long_options, &long_index)) != -1) {
 		PROG_OPTION curr_option = char_to_prog_option(opt);
 
@@ -93,25 +121,46 @@ int main(int argc, char** argv) {
 
 		switch (opt) {
 			case 's':
-				seed = atol(optarg);
+				if(validate_number_input(optarg))
+					seed = atol(optarg);
+				else
+					PROGRAM_ERROR("invalid seed");
 				break;
 			case 'r':
-				rows = atoi(optarg);
+				if(validate_number_input(optarg))
+					rows = atoi(optarg);
+				else
+					PROGRAM_ERROR("invalid number of rows");
 				break;
 			case 'c':
-				cols = atoi(optarg);
+				if(validate_number_input(optarg))
+					cols = atoi(optarg);
+				else
+					PROGRAM_ERROR("invalid number of columns");
 				break;
 			case 'n':
-				min = atof(optarg);
+				if(validate_number_input(optarg))
+					min = atof(optarg);
+				else
+					PROGRAM_ERROR("invalid min value of weights");
 				break;
 			case 'x':
-				max = atof(optarg);
+				if(validate_number_input(optarg))
+					max = atof(optarg);
+				else
+					PROGRAM_ERROR("invalid max value of weights");
 				break;
 			case '1':
-				vert1 = atoi(optarg);
+				if(validate_number_input(optarg))
+					vert1 = atoi(optarg);
+				else
+					PROGRAM_ERROR("invalid vertex 1 index");
 				break;
 			case '2':
-				vert2 = atoi(optarg);
+				if(validate_number_input(optarg))
+					vert2 = atoi(optarg);
+				else
+					PROGRAM_ERROR("invalid vertex 2 index");
 				break;
 			case 'h':
 			case 'g':
@@ -181,8 +230,9 @@ int main(int argc, char** argv) {
 			PROGRAM_ERROR("dijkstra: the specified verticies are not the part of the graph");
 		}
 
+
 		DijkstraResult * result = dijkstra(graph, vert1);
-		dijkstra_print_path(result, vert2);
+		dijkstra_print_path(result, graph, vert2);
 		dijkstra_result_free(result);
 		graph_free(graph);
 
