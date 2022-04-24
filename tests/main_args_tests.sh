@@ -80,7 +80,7 @@ echo "1 -1" | $graphalgo -b -1 0 2> /dev/null
 assert_fail "graph size < 1"
 
 # =========================
-$graphalgo -g -r2 -c2 -n0 -x1 -s0 | head -n3 | $graphalgo -b -1 0 2> /dev/null
+$graphalgo -g -r20 -c20 -n0 -x1 -s0 | head -n1 | $graphalgo -b -1 0 2> /dev/null
 assert_fail "incomplete file: missing verticies"
 
 # =========================
@@ -102,5 +102,25 @@ assert_fail "directed graph from stdin 1"
 # =========================
 $graphalgo -g -r2 -c2 -n0 -x1 -s0 | sed '4,5s/.*//' | $graphalgo -b -1 0 > /dev/null
 assert_fail "directed graph from stdin 2"
+
+# =========================
+$graphalgo -g -ra -c2 -n0 -x1 -s0 
+assert_fail "letters instead of integers 1"
+
+# =========================
+$graphalgo -g -r2 -ca -n0 -x1 -s0 
+assert_fail "letters instead of integers 2"
+
+# =========================
+$graphalgo -g -r2 -c2 -na -x1 -s0 
+assert_fail "letters instead of integers 3"
+
+# =========================
+$graphalgo -g -r2 -c2 -n0 -xa -s0 
+assert_fail "letters instead of integers 4"
+
+# =========================
+$graphalgo -g -r2 -c2 -n0 -x1 -sa 
+assert_fail "letters instead of integers 5"
 
 
