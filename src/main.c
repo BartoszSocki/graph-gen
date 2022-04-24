@@ -23,47 +23,16 @@ static void print_help() {
 	printf("graphalgo -d -1<VERT1> -2<VERT2>\n");
 }
 
-static int validate_double_input(char * in)
-{
-	//indicates wheather '.' has been already used
-	int dot_used=0; 
-
-	//iterate through text
-	while(*in != '\0')
-	{
-		//check if its in range 0-9
-		if(!(*in >= '0' && *in <='9'))
-		{
-			if(*in == '.'){
-				dot_used++;
-				//if there are two dots the input is invalid
-				if(dot_used == 2)
-					return 0;
-			}
-			else{
-				return 0;
-			}
-		}	
-		in++;
-	}
-
-	return 1;
+static int parse_double(char *string, double *value) {
+	char *stopchar;
+	*value = strtod(string, &stopchar);
+	return string != stopchar;
 }
 
-static int validate_long_input(char * in)
-{
-	//iterate through text
-	while(*in != '\0')
-	{
-		//check if its in range 0-9
-		if(!(*in >= '0' && *in <='9'))
-		{
-			return 0;
-		}	
-		in++;
-	}
-
-	return 1;
+static int parse_long(char *string, long *value) {
+	char *stopchar;
+	*value = strtol(string, &stopchar, 10);
+	return string != stopchar;
 }
 
 /* maski bitowe opcji */
@@ -137,45 +106,31 @@ int main(int argc, char** argv) {
 
 		switch (opt) {
 			case 's':
-				if(validate_long_input(optarg))
-					seed = atol(optarg);
-				else
+				if(!parse_long(optarg, &seed))
 					PROGRAM_ERROR("invalid seed");
 				break;
 			case 'r':
-				if(validate_long_input(optarg))
-					rows = atoi(optarg);
-				else
+				if(!parse_long(optarg, &rows))
 					PROGRAM_ERROR("invalid number of rows");
 				break;
 			case 'c':
-				if(validate_long_input(optarg))
-					cols = atoi(optarg);
-				else
+				if(!parse_long(optarg, &cols))
 					PROGRAM_ERROR("invalid number of columns");
 				break;
 			case 'n':
-				if(validate_double_input(optarg))
-					min = atof(optarg);
-				else
+				if(!parse_double(optarg, &min))
 					PROGRAM_ERROR("invalid min value of weights");
 				break;
 			case 'x':
-				if(validate_double_input(optarg))
-					max = atof(optarg);
-				else
+				if(!parse_double(optarg, &max))
 					PROGRAM_ERROR("invalid max value of weights");
 				break;
 			case '1':
-				if(validate_long_input(optarg))
-					vert1 = atoi(optarg);
-				else
+				if(!parse_long(optarg, &vert1))
 					PROGRAM_ERROR("invalid index of vertex1");
 				break;
 			case '2':
-				if(validate_long_input(optarg))
-					vert2 = atoi(optarg);
-				else
+				if(!parse_long(optarg, &vert2))
 					PROGRAM_ERROR("invalid index of vertex2");
 				break;
 			case 'h':

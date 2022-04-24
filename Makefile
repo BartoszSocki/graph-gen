@@ -1,4 +1,4 @@
-CFLAGS=-ggdb  -Wall -pedantic --std=c99 -Wmisleading-indentation
+CFLAGS=-ggdb  -Wall -pedantic --std=c99 -Wmisleading-indentation -w
 .DEFAULT_GOAL := all
 
 objs/vertex_priority_queue.o: src/vertex_priority_queue.c src/vertex_priority_queue.h

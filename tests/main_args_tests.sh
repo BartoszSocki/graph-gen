@@ -97,10 +97,10 @@ assert_fail "incomplete file: missing vertex"
 
 # =========================
 $graphalgo -g -r2 -c2 -n0 -x1 -s0 | sed '2,3s/.*//' | $graphalgo -b -1 0 > /dev/null
-assert_success "directed graph from stdin 1"
+assert_fail "directed graph from stdin 1"
 
 # =========================
 $graphalgo -g -r2 -c2 -n0 -x1 -s0 | sed '4,5s/.*//' | $graphalgo -b -1 0 > /dev/null
-assert_success "directed graph from stdin 2"
+assert_fail "directed graph from stdin 2"
 
 
