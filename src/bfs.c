@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "bfs.h"
 #include "graph.h"
 
@@ -13,7 +14,7 @@ void bfs_print_result(BFSResult *result) {
 	puts("Vertex\tDistance");
 	for (int i = 0; i < result->size; i++) {
 		/* tylko jeżeli istnieje */
-		if (result->visited[i])
+		if (result->verticies[i] != -1 && result->visited[result->verticies[i]])
 			printf("%d\t%lf\n", result->verticies[i], result->distance[i]);
 	}
 }
@@ -32,6 +33,8 @@ BFSResult *bfs(Graph *graph, int start_vertex) {
 
 	result->visited = calloc(graph_size, sizeof(*(result->visited)));
 	result->verticies = calloc(graph_size, sizeof(*(result->verticies)));
+	memset(result->verticies, -1, graph_size * sizeof(*(result->verticies)));
+
 	result->distance = calloc(graph_size, sizeof(*(result->distance)));
 	result->size = graph_size;
 
