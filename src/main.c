@@ -29,9 +29,9 @@ static int parse_double(char *string, double *value) {
 	return string != stopchar;
 }
 
-static int parse_long(char *string, long *value) {
+static int parse_long(char *string, int *value) {
 	char *stopchar;
-	*value = strtol(string, &stopchar, 10);
+	*value = (int)strtol(string, &stopchar, 10);
 	return string != stopchar;
 }
 
